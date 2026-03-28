@@ -22,10 +22,10 @@ load_dotenv(_PROJECT_ROOT / ".env")
 # Tool definitions
 # ---------------------------------------------------------------------------
 
-search_wrapper = GoogleSerperAPIWrapper(
-    serper_api_key=os.getenv("SERPER_API_KEY"),
-    k=10,
-)
+_serper_key = os.getenv("SERPER_API_KEY")
+search_wrapper = None
+if _serper_key:
+    search_wrapper = GoogleSerperAPIWrapper(serper_api_key=_serper_key, k=10)
 
 
 @tool
@@ -37,6 +37,8 @@ def serper_search(query: str) -> str:
     Args:
         query: La requête de recherche à effectuer.
     """
+    if search_wrapper is None:
+        return "Erreur: SERPER_API_KEY non configuré dans .env"
     return search_wrapper.run(query)
 
 
@@ -105,14 +107,13 @@ class ComplianceGuardChain:
 
         # LLM — Azure-hosted model via OpenAI-compatible API
         raw_model = os.getenv("model", "Llama-4-Maverick-17B-128E-Instruct-FP8")
-        # Strip 'azure/' prefix if present (LiteLLM / CrewAI convention)
         model_name = raw_model.replace("azure/", "")
 
         azure_base = os.getenv("AZURE_API_BASE", "").rstrip("/")
         azure_key = os.getenv("AZURE_API_KEY", "")
         azure_api_version = os.getenv("AZURE_API_VERSION", "")
 
-        # Normalize endpoint style across Azure OpenAI and Azure AI Inference.
+        # Normalize endpoint style
         if "services.ai.azure.com" in azure_base and not azure_base.endswith("/models"):
             api_base = f"{azure_base}/models"
         elif "openai.azure.com" in azure_base:
@@ -131,7 +132,7 @@ class ComplianceGuardChain:
             "model": model_name,
             "temperature": temperature,
             "api_key": azure_key,
-            "openai_api_base": api_base,
+            "base_url": api_base,
         }
         if azure_api_version:
             llm_kwargs["default_query"] = {"api-version": azure_api_version}
@@ -283,7 +284,7 @@ class ComplianceGuardChain:
             for tc in response.tool_calls:
                 tool_name = tc["name"]
                 tool_args = tc["args"]
-                print(f"  🔧 Calling tool: {tool_name}({tool_args})")
+                print(f"  Calling tool: {tool_name}({tool_args})")
 
                 if tool_name in _TOOL_MAP:
                     result = _TOOL_MAP[tool_name].invoke(tool_args)
@@ -308,5 +309,5 @@ class ComplianceGuardChain:
         with open(report_path, "w", encoding="utf-8") as f:
             f.write(output)
 
-        print(f"\n✅ Rapport sauvegardé dans '{report_path}'")
+        print(f"\n Rapport sauvegardé dans '{report_path}'")
         return output
