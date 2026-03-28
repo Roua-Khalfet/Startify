@@ -178,13 +178,13 @@ def build_graph_from_docs(docs: list[Document], graph: Neo4jGraph):
     Utilise LLMGraphTransformer pour extraire entités et relations
     et les insérer dans Neo4j.
     """
-    # Groq API (ultra-fast inference, compatible OpenAI)
-    # Using GPT-OSS 120B which supports json_schema structured outputs
-    # (llama-3.3-70b-versatile does NOT support structured outputs)
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+    
+    # Groq API - back to 120B for reliability
     llm = ChatOpenAI(
         model="openai/gpt-oss-120b",
         temperature=0,
-        max_tokens=8192,  # Increase output limit for complex entity extraction
+        max_tokens=8192,
         api_key=os.getenv("GROQ_API_KEY"),
         base_url="https://api.groq.com/openai/v1",
     )
@@ -197,10 +197,12 @@ def build_graph_from_docs(docs: list[Document], graph: Neo4jGraph):
             "Condition", "Delai", "Montant", "Domaine"
         ],
         allowed_relationships=[
-            "PREVOIT", "PRÉVOIT",  # both ASCII and accented versions
+            "PREVOIT", "PRÉVOIT",
             "CONDITIONNE", "CONCERNE",
-            "MODIFIE", "APPLIQUE", "DEPEND_DE",
-            "COUVRE", "IMPLIQUE", "REFERENCE"
+            "MODIFIE", "APPLIQUE",
+            "DEPEND_DE", "DÉPEND_DE",
+            "COUVRE", "IMPLIQUE",
+            "REFERENCE", "RÉFÉRENCE"
         ],
         node_properties=["description", "valeur", "reference", "date"],
         relationship_properties=["note"],
@@ -209,14 +211,13 @@ def build_graph_from_docs(docs: list[Document], graph: Neo4jGraph):
 
     print(f"\nExtraction des entités sur {len(docs)} chunks...")
     batch_size = 10
-    total_batches = (len(docs) - 1) // batch_size + 1
+    batches = [docs[i:i + batch_size] for i in range(0, len(docs), batch_size)]
+    total_batches = len(batches)
     max_retries = 3
+    max_workers = 3  # Parallel API calls (respect rate limits)
 
-    for i in range(0, len(docs), batch_size):
-        batch = docs[i:i + batch_size]
-        batch_num = i // batch_size + 1
-        success = False
-
+    def process_batch(batch_num: int, batch: list[Document]) -> tuple[int, bool, str]:
+        """Process a single batch with retries."""
         for attempt in range(1, max_retries + 1):
             try:
                 graph_docs = transformer.convert_to_graph_documents(batch)
@@ -225,25 +226,30 @@ def build_graph_from_docs(docs: list[Document], graph: Neo4jGraph):
                     baseEntityLabel=True,
                     include_source=True,
                 )
-                print(f"  Batch {batch_num}/{total_batches} ✓")
-                success = True
-                break
+                return batch_num, True, ""
             except Exception as e:
                 err_str = str(e)
                 if "429" in err_str:
-                    wait = 2 ** attempt * 3  # 6s, 12s, 24s
-                    print(f"  Batch {batch_num} rate-limited (tentative {attempt}/{max_retries}), "
-                          f"attente {wait}s...")
+                    wait = 2 ** attempt * 3
                     time.sleep(wait)
                 else:
-                    print(f"  Batch {batch_num} erreur: {e}")
-                    break
+                    return batch_num, False, err_str
+        return batch_num, False, "max retries"
 
-        if not success:
-            print(f"  Batch {batch_num} ignorée après échecs.")
-
-        # Pause pour Groq rate limit (30 req/min free tier)
-        time.sleep(3)
+    completed = 0
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        futures = {
+            executor.submit(process_batch, i + 1, batch): i + 1
+            for i, batch in enumerate(batches)
+        }
+        
+        for future in as_completed(futures):
+            batch_num, success, error = future.result()
+            completed += 1
+            if success:
+                print(f"  Batch {batch_num}/{total_batches} ✓ ({completed}/{total_batches} done)")
+            else:
+                print(f"  Batch {batch_num} erreur: {error}")
 
 
 # ── ÉTAPE 3 : INDEX VECTORIEL NEO4J ──────────────────────────────────────────
