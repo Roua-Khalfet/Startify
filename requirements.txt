@@ -17,6 +17,7 @@ qdrant-client>=1.11.0
 # PDF processing
 pypdf>=4.0.0
 pdfplumber>=0.11.0
+unstructured[pdf,docx]
  
 # Embeddings & LLM
 openai>=1.30.0

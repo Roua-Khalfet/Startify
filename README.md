@@ -22,7 +22,7 @@ ComplianceGuard est un système d'IA qui aide les entrepreneurs tunisiens à nav
 │  │                                                               │  │
 │  │   ┌─────────────┐    ┌─────────────┐    ┌─────────────────┐   │  │
 │  │   │   Qdrant    │    │   Neo4j     │    │     Ollama      │   │  │
-│  │   │  (Vectors)  │    │  (Graph)    │    │   (bge-m3)      │   │  │
+│  │   │  (Vectors)  │    │  (Graph)    │    │ (qwen3-embedding:0.6b) │   │  │
 │  │   └──────┬──────┘    └──────┬──────┘    └────────┬────────┘   │  │
 │  │          │                  │                    │            │  │
 │  │          └─────────┬────────┴────────────────────┘            │  │
@@ -196,6 +196,9 @@ QDRANT_URL=https://xxxx.cloud.qdrant.io
 QDRANT_API_KEY=your_qdrant_api_key
 QDRANT_COLLECTION=complianceguard_chunks
 
+# Ollama embeddings
+OLLAMA_EMBED_MODEL=qwen3-embedding:0.6b
+
 # Serper (recherche web)
 SERPER_API_KEY=your_serper_key
 ```
@@ -203,7 +206,15 @@ SERPER_API_KEY=your_serper_key
 ### 4. Télécharger le modèle d'embedding
 
 ```powershell
-ollama pull bge-m3
+ollama pull qwen3-embedding:0.6b
+```
+
+Si vous migrez depuis `bge-m3` (ou un autre modèle), vous devez réindexer les vecteurs Qdrant pour éviter les incompatibilités de dimension :
+
+```powershell
+# 1) Supprimer la collection Qdrant existante (Dashboard Qdrant ou API)
+# 2) Relancer l'ingestion complète pour recréer les vecteurs avec qwen
+python -m complianceguard.ingest
 ```
 
 ## 💻 Utilisation
@@ -266,7 +277,7 @@ Durant le développement, les corrections suivantes ont été apportées :
 | **LLM** | Azure OpenAI (Llama 4) | Génération de réponses |
 | **Graphe** | Neo4j Aura | Relations juridiques (entités, articles) |
 | **Vecteurs** | Qdrant Cloud | Recherche sémantique sur chunks |
-| **Embeddings** | Ollama + bge-m3 | Vectorisation multilingue locale |
+| **Embeddings** | Ollama + qwen3-embedding:0.6b | Vectorisation multilingue locale |
 | **Web Search** | Serper API | Recherche Google |
 | **Scraping** | WebBaseLoader | Extraction de contenu web |
 | **Config** | Pydantic Settings | Validation des variables d'environnement |

@@ -39,15 +39,16 @@ load_dotenv(PROJECT_ROOT / ".env", override=True)
 # ============================================================================
 
 def get_answer_function():
-    """Lazy import of answer_question."""
+    """Lazy import of crag_answer and answer_question."""
     try:
         from complianceguard.ask_question import answer_question, _is_greeting_or_non_question
-        return answer_question, _is_greeting_or_non_question
+        from complianceguard.crag import crag_answer
+        return answer_question, crag_answer, _is_greeting_or_non_question
     except Exception as e:
         import traceback
         print(f"ERROR importing ask_question: {e}")
         traceback.print_exc()
-        return None, None
+        return None, None, None
 
 def get_redacteur():
     """Lazy import of AgentRedacteur."""
@@ -606,6 +607,7 @@ def api_root(request):
         "version": "1.0.0",
         "endpoints": {
             "chat": "/api/chat/",
+            "upload": "/api/upload/",
             "conformite": "/api/conformite/",
             "documents": "/api/documents/",
             "graph": "/api/graph/",
@@ -616,7 +618,7 @@ def api_root(request):
 
 @api_view(["POST"])
 def chat(request):
-    """Chat avec l'agent GraphRAG."""
+    """Chat avec l'agent GraphRAG ou le système CRAG."""
     serializer = ChatRequestSerializer(data=request.data)
     if not serializer.is_valid():
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -624,13 +626,14 @@ def chat(request):
     data = serializer.validated_data
     message = data["message"]
     project_context = data.get("project_context", "")
+    mode = data.get("mode", "kb") # "kb" pour GraphRAG, "notebook" pour CRAG uploads
     
-    answer_question, is_greeting = get_answer_function()
+    answer_question_func, crag_func, is_greeting = get_answer_function()
     
-    if answer_question is None:
+    if answer_question_func is None or crag_func is None:
         # Fallback response if agents not available
         return Response({
-            "response": "L'agent GraphRAG n'est pas disponible. Vérifiez que les dépendances sont installées.",
+            "response": "Les agents ne sont pas disponibles. Vérifiez que les dépendances sont installées.",
             "sources": [],
             "source_type": "error"
         })
@@ -652,19 +655,25 @@ def chat(request):
     
     # Enrich question with context
     enriched_question = message
-    if project_context:
+    # In notebook mode we keep the raw user question to avoid degrading
+    # CRAG retrieval with UI-level context strings.
+    if project_context and mode != "notebook":
         enriched_question = f"Contexte projet: {project_context}\n\nQuestion: {message}"
     
     try:
-        answer, sources = answer_question(enriched_question, max_docs=8, enable_web_fallback=True)
-        
-        source_type = "Web" if "[Source: Recherche Web]" in answer else "GraphRAG"
-        answer = answer.replace("\n\n[Source: Recherche Web]", "")
+        if mode == "notebook":
+            answer, sources, metadata = crag_func(enriched_question, enable_web_fallback=False, mode="notebook")
+            source_type = metadata.get("action", "CRAG")
+        else:
+            answer, sources = answer_question_func(enriched_question, enable_web_fallback=True, mode="kb")
+            metadata = {}
+            source_type = "GraphRAG"
         
         return Response({
             "response": answer,
             "sources": sources,
-            "source_type": source_type
+            "source_type": source_type,
+            "metadata": metadata
         })
     except Exception as e:
         # Fallback: return a helpful message when Qdrant/Neo4j not available
@@ -686,6 +695,40 @@ def chat(request):
             "sources": [],
             "source_type": "error"
         })
+
+import tempfile
+
+@api_view(["POST"])
+def upload_document(request):
+    """Uploads a file for fast ingestion."""
+    if 'file' not in request.FILES:
+        return Response({"error": "No file uploaded"}, status=status.HTTP_400_BAD_REQUEST)
+        
+    try:
+        from complianceguard.ingest import fast_ingest_file
+    except ImportError:
+        return Response({"error": "Document parsing not available (unstructured not installed)"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    uploaded_file = request.FILES['file']
+    
+    with tempfile.NamedTemporaryFile(delete=False, suffix=Path(uploaded_file.name).suffix) as tf:
+        for chunk in uploaded_file.chunks():
+            tf.write(chunk)
+        temp_path = tf.name
+        
+    # We rename it to the original locally so Docling uses the right extension
+    try:
+        target_path = Path(temp_path).parent / uploaded_file.name
+        os.rename(temp_path, target_path)
+        result = fast_ingest_file(target_path)
+        os.unlink(target_path)
+        return Response(result)
+    except Exception as e:
+        if os.path.exists(target_path):
+            os.unlink(target_path)
+        elif os.path.exists(temp_path):
+            os.unlink(temp_path)
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(["POST"])
 def conformite(request):

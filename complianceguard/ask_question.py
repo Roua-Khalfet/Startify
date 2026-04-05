@@ -5,15 +5,17 @@ from __future__ import annotations
 
 import argparse
 import os
+import logging
 from pathlib import Path
 from typing import Iterable
 import re
 
 from dotenv import load_dotenv
 from langchain_core.messages import HumanMessage, SystemMessage
-from langchain_openai import AzureChatOpenAI
+from langchain_openai import AzureChatOpenAI, ChatOpenAI
 from langchain_community.utilities import GoogleSerperAPIWrapper
-from langchain_community.document_loaders import WebBaseLoader
+
+logger = logging.getLogger(__name__)
 
 _PDF_NAME_RE = re.compile(r"\b[\w\-]+(?:_[\w\-]+)*\.pdf\b", re.IGNORECASE)
 
@@ -45,7 +47,31 @@ except ModuleNotFoundError:
     from tools.retriever import get_hybrid_retriever, setup_fulltext_index
 
 
-def _build_llm() -> AzureChatOpenAI:
+def _build_llm() -> ChatOpenAI | AzureChatOpenAI:
+    llm_provider = os.getenv("LLM_PROVIDER", "").strip().lower()
+
+    groq_api_key = os.getenv("GROQ_API_KEY", "").strip()
+    groq_model = (
+        os.getenv("GROQ_MODEL", "").strip()
+        or "openai/gpt-oss-120b"
+    )
+    groq_base_url = os.getenv("GROQ_BASE_URL", "https://api.groq.com/openai/v1").strip()
+
+    # Prefer Groq for CRAG when explicitly requested or when a Groq key is present.
+    use_groq = llm_provider == "groq" or (groq_api_key and llm_provider != "azure")
+    if use_groq:
+        if not groq_api_key:
+            raise RuntimeError("Configuration Groq incomplete: GROQ_API_KEY")
+
+        print(f"[LLM] Provider=groq model={groq_model}")
+
+        return ChatOpenAI(
+            model=groq_model,
+            api_key=groq_api_key,
+            base_url=groq_base_url,
+            temperature=0,
+        )
+
     azure_endpoint = (
         os.getenv("AZURE_OPENAI_ENDPOINT", "").strip()
         or os.getenv("AZURE_API_BASE", "").strip()
@@ -87,6 +113,28 @@ def _build_llm() -> AzureChatOpenAI:
         api_key=api_key,
         temperature=0,
     )
+
+
+def _looks_like_groq_error(exc: Exception) -> bool:
+    msg = str(exc).lower()
+    provider = os.getenv("LLM_PROVIDER", "").strip().lower()
+    return (
+        provider == "groq"
+        or "groq" in msg
+        or "api.groq.com" in msg
+        or "openaierror" in msg
+        or "ratelimit" in msg
+        or "429" in msg
+    )
+
+
+def _report_inference_error(stage: str, exc: Exception, question: str = "") -> None:
+    prefix = "[GROQ][INFERENCE][ERROR]" if _looks_like_groq_error(exc) else "[LLM][INFERENCE][ERROR]"
+    q_preview = " ".join((question or "").split())[:180]
+    print(f"{prefix} stage={stage} message={exc}")
+    if q_preview:
+        print(f"{prefix} question={q_preview}")
+    logger.exception("%s stage=%s question_preview=%s", prefix, stage, q_preview)
 
 
 def _is_legal_ref(value: str) -> bool:
@@ -133,6 +181,18 @@ def _sanitize_answer_text(text: str) -> str:
 
 
 def _build_context(docs: Iterable, max_docs: int = 8, max_chars: int = 1200) -> str:
+    def _truncate_for_context(text: str, limit: int) -> str:
+        if len(text) <= limit:
+            return text
+
+        # Keep both the beginning and end of long chunks. In legal documents,
+        # operative conditions are often listed near section ends.
+        head_len = max(200, (limit // 2) - 20)
+        tail_len = max(200, limit - head_len - 20)
+        head = text[:head_len].rstrip()
+        tail = text[-tail_len:].lstrip()
+        return f"{head} ... {tail}"
+
     chunks: list[str] = []
     for i, doc in enumerate(list(docs)[:max_docs], start=1):
         ref = str(doc.metadata.get("reference", "") or "").strip()
@@ -140,8 +200,7 @@ def _build_context(docs: Iterable, max_docs: int = 8, max_chars: int = 1200) -> 
         text = " ".join(text.split())
         if not text:
             continue
-        if len(text) > max_chars:
-            text = text[:max_chars] + "..."
+        text = _truncate_for_context(text, max_chars)
         if _is_legal_ref(ref):
             chunks.append(f"[{i}] reference={ref}\n{text}")
         else:
@@ -221,6 +280,7 @@ def _web_search(query: str) -> tuple[str, list[str]]:
     for url in web_sources[:2]:
         try:
             print(f"[Web] Scraping {url[:50]}...")
+            from langchain_community.document_loaders import WebBaseLoader
             loader = WebBaseLoader(url)
             docs = loader.load()
             content = "\n".join(doc.page_content for doc in docs)
@@ -232,7 +292,7 @@ def _web_search(query: str) -> tuple[str, list[str]]:
     return web_context, web_sources
 
 
-def answer_question(question: str, max_docs: int = 8, enable_web_fallback: bool = True) -> tuple[str, list[str]]:
+def answer_question(question: str, max_docs: int = 8, enable_web_fallback: bool = True, mode: str = "kb") -> tuple[str, list[str]]:
     # Détecter les salutations et non-questions
     if _is_greeting_or_non_question(question):
         return (
@@ -245,7 +305,7 @@ def answer_question(question: str, max_docs: int = 8, enable_web_fallback: bool 
         )
     
     setup_fulltext_index()
-    retriever = get_hybrid_retriever()
+    retriever = get_hybrid_retriever(search_mode=mode)
     docs = retriever.invoke(question)
 
     context = _build_context(docs, max_docs=max_docs)
@@ -281,12 +341,16 @@ def answer_question(question: str, max_docs: int = 8, enable_web_fallback: bool 
         "Reponds en francais, de maniere concise et concrete."
     )
 
-    result = llm.invoke(
-        [
-            SystemMessage(content=system_prompt),
-            HumanMessage(content=human_prompt),
-        ]
-    )
+    try:
+        result = llm.invoke(
+            [
+                SystemMessage(content=system_prompt),
+                HumanMessage(content=human_prompt),
+            ]
+        )
+    except Exception as exc:
+        _report_inference_error("answer_question.invoke", exc, question=question)
+        raise
     answer = (result.content or "").strip() if hasattr(result, "content") else str(result)
     answer = _sanitize_answer_text(answer)
     

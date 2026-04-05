@@ -17,11 +17,12 @@ class Settings(BaseSettings):
     # Qdrant Configuration
     QDRANT_URL: str = Field(default="", env="QDRANT_URL")
     QDRANT_API_KEY: str = Field(default="", env="QDRANT_API_KEY")
-    QDRANT_COLLECTION_NAME: str = Field(default="compliance_vectors", env="QDRANT_COLLECTION_NAME")
+    QDRANT_PATH: str = Field(default="", env="QDRANT_PATH")
+    QDRANT_COLLECTION_NAME: str = Field(default="complianceguard_chunks", env="QDRANT_COLLECTION_NAME")
     
     # Ollama Embeddings
     OLLAMA_BASE_URL: str = Field(default="http://localhost:11434", env="OLLAMA_BASE_URL")
-    OLLAMA_EMBED_MODEL: str = Field(default="bge-m3", env="OLLAMA_EMBED_MODEL")
+    OLLAMA_EMBED_MODEL: str = Field(default="qwen3-embedding:0.6b", env="OLLAMA_EMBED_MODEL")
     OLLAMA_INFERENCE_MODEL: str = Field(default="llama3.1", env="OLLAMA_MODEL") # Fallback model
     
     # Azure OpenAI Configuration (Extraction/Agent)

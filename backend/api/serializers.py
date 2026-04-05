@@ -9,6 +9,7 @@ class ChatRequestSerializer(serializers.Serializer):
     message = serializers.CharField()
     project_context = serializers.CharField(required=False, allow_blank=True)
     sector = serializers.CharField(required=False, allow_blank=True)
+    mode = serializers.CharField(required=False, default="kb", allow_blank=True)
 
 
 class ChatResponseSerializer(serializers.Serializer):
