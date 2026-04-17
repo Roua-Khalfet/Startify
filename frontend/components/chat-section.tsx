@@ -27,6 +27,7 @@ export default function ChatSection() {
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [mode, setMode] = useState<BackendMode>('kb')
+  const [knowledgeOnly, setKnowledgeOnly] = useState(false)
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
   const [showUpload, setShowUpload] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -39,7 +40,7 @@ export default function ChatSection() {
     setIsLoading(true)
 
     try {
-      const result = await sendChatMessage({ message: userMsg.content, mode })
+      const result = await sendChatMessage({ message: userMsg.content, mode, knowledgeOnly })
       setMessages(prev => [...prev, {
         id: (Date.now() + 1).toString(), role: 'assistant', content: result.response,
         timestamp: new Date(), sourceType: result.source_type, sources: result.sources,
@@ -88,12 +89,39 @@ export default function ChatSection() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={() => setMode(mode === 'kb' ? 'notebook' : 'kb')}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border border-border hover:bg-secondary transition-colors">
+          <button
+            onClick={() => {
+              const next = !knowledgeOnly
+              setKnowledgeOnly(next)
+              if (next) {
+                setMode('kb')
+                setShowUpload(false)
+              }
+            }}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+              knowledgeOnly
+                ? 'border-emerald-400 bg-emerald-50 text-emerald-700'
+                : 'border-border hover:bg-secondary'
+            }`}
+          >
+            {knowledgeOnly ? <ToggleRight className="w-4 h-4 text-emerald-600" /> : <ToggleLeft className="w-4 h-4 text-muted-foreground" />}
+            {knowledgeOnly ? 'Knowledge uniquement' : 'Knowledge mixte'}
+          </button>
+          <button
+            onClick={() => setMode(mode === 'kb' ? 'notebook' : 'kb')}
+            disabled={knowledgeOnly}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border border-border hover:bg-secondary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             {mode === 'kb' ? <ToggleLeft className="w-4 h-4 text-indigo-500" /> : <ToggleRight className="w-4 h-4 text-violet-500" />}
             {mode === 'kb' ? 'Base juridique' : 'Mes documents'}
           </button>
-          <Button variant="outline" size="sm" onClick={() => setShowUpload(!showUpload)} className="gap-1.5 text-xs">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowUpload(!showUpload)}
+            disabled={knowledgeOnly}
+            className="gap-1.5 text-xs disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             <Upload className="w-3.5 h-3.5" /> Upload PDF
           </Button>
         </div>

@@ -97,8 +97,10 @@ export async function sendChatMessage(params: {
   message: string
   mode: BackendMode
   projectContext?: string
+  knowledgeOnly?: boolean
 }): Promise<ChatResponse> {
-  const response = await fetch(`${API_BASE}/chat/`, {
+  const endpoint = params.knowledgeOnly ? `${API_BASE}/chat/knowledge/` : `${API_BASE}/chat/`
+  const response = await fetch(endpoint, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({

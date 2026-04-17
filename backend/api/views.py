@@ -3,6 +3,7 @@ API Views for ComplianceGuard - Django REST Framework.
 
 Endpoints:
 - POST /api/chat/ - Chat avec l'agent GraphRAG
+- POST /api/chat/knowledge/ - Chat knowledge-only via backend/knowledge/ask_graph_rag.py
 - POST /api/conformite/ - Analyse de conformité avec scoring
 - POST /api/documents/ - Génération de documents
 - GET /api/graph/ - Données du graphe Neo4j
@@ -12,6 +13,7 @@ Endpoints:
 
 import os
 import sys
+import importlib.util
 from pathlib import Path
 from datetime import datetime
 from dotenv import load_dotenv
@@ -33,6 +35,8 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 # Force load .env from project root
 load_dotenv(PROJECT_ROOT / ".env", override=True)
+
+_LOCAL_GRAPHRAG_FUNCTION = None
 
 # ============================================================================
 # Import agents (lazy loading to avoid startup errors)
@@ -58,6 +62,47 @@ def get_redacteur():
     except Exception as e:
         print(f"Warning: Could not import agent_redacteur: {e}")
         return None, None
+
+
+def get_local_graph_rag_function():
+    """Lazy import of backend/knowledge/ask_graph_rag.py runner."""
+    global _LOCAL_GRAPHRAG_FUNCTION
+    if _LOCAL_GRAPHRAG_FUNCTION is not None:
+        return _LOCAL_GRAPHRAG_FUNCTION
+
+    module_path = PROJECT_ROOT / "backend" / "knowledge" / "ask_graph_rag.py"
+    try:
+        spec = importlib.util.spec_from_file_location("local_graph_rag", module_path)
+        if spec is None or spec.loader is None:
+            raise RuntimeError(f"Unable to load spec for {module_path}")
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        runner = getattr(module, "run_local_graph_rag", None)
+        if runner is None:
+            raise AttributeError("run_local_graph_rag not found in ask_graph_rag.py")
+        _LOCAL_GRAPHRAG_FUNCTION = runner
+        return _LOCAL_GRAPHRAG_FUNCTION
+    except Exception as e:
+        print(f"ERROR importing local GraphRAG runner: {e}")
+        return None
+
+
+def is_simple_greeting_or_non_question(text: str) -> bool:
+    """Lightweight greeting detector to avoid loading full chat stack."""
+    text_lower = (text or "").lower().strip()
+    greetings = {
+        "bonjour", "bonsoir", "salut", "hello", "hi", "hey",
+        "coucou", "salam", "bsr", "bjr", "cc", "merci", "thanks",
+        "ok", "oui", "non", "d'accord", "super", "bien", "cool",
+    }
+
+    words = text_lower.split()
+    if len(words) < 3:
+        if any(greeting in text_lower for greeting in greetings):
+            return True
+        if "?" not in text and len(text_lower) < 20:
+            return True
+    return False
 
 # ============================================================================
 # Advanced Conformité Scoring System
@@ -607,6 +652,7 @@ def api_root(request):
         "version": "1.0.0",
         "endpoints": {
             "chat": "/api/chat/",
+            "chat_knowledge": "/api/chat/knowledge/",
             "upload": "/api/upload/",
             "conformite": "/api/conformite/",
             "documents": "/api/documents/",
@@ -695,6 +741,68 @@ def chat(request):
             "sources": [],
             "source_type": "error"
         })
+
+
+@api_view(["POST"])
+def chat_knowledge(request):
+    """Chat knowledge-only via local GraphRAG pipeline from backend/knowledge/ask_graph_rag.py."""
+    serializer = ChatRequestSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    data = serializer.validated_data
+    message = data["message"]
+    project_context = data.get("project_context", "")
+
+    if is_simple_greeting_or_non_question(message):
+        return Response({
+            "response": (
+                "Bonjour ! Je suis l'assistant juridique ComplianceGuard, "
+                "spécialisé dans le Startup Act tunisien.\n\n"
+                "Posez-moi une question juridique, par exemple :\n"
+                "- Quels documents pour obtenir le label startup ?\n"
+                "- Quels sont les avantages fiscaux du Startup Act ?\n"
+                "- Comment obtenir le congé startup ?"
+            ),
+            "sources": [],
+            "source_type": "system",
+            "metadata": {"mode": "knowledge-only"},
+        })
+
+    graphrag_func = get_local_graph_rag_function()
+    if graphrag_func is None:
+        return Response({
+            "response": "Le moteur GraphRAG local n'est pas disponible actuellement.",
+            "sources": [],
+            "source_type": "error",
+            "metadata": {"mode": "knowledge-only"},
+        }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+
+    enriched_question = message
+    if project_context:
+        enriched_question = f"Contexte projet: {project_context}\n\nQuestion: {message}"
+
+    try:
+        answer, sources, metadata = graphrag_func(
+            enriched_question,
+            llm_provider="azure",
+            timeout=45,
+            top_k=4,
+            max_sources=6,
+        )
+        return Response({
+            "response": answer,
+            "sources": sources,
+            "source_type": metadata.get("source_type", "GraphRAG Local") if isinstance(metadata, dict) else "GraphRAG Local",
+            "metadata": metadata if isinstance(metadata, dict) else {"mode": "knowledge-only"},
+        })
+    except Exception as e:
+        return Response({
+            "response": f"Erreur GraphRAG local: {e}",
+            "sources": [],
+            "source_type": "error",
+            "metadata": {"mode": "knowledge-only"},
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 import tempfile
 
