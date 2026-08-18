@@ -254,7 +254,8 @@ def get_rlm(provider: str = "groq", verbose: bool = True, max_iterations: int = 
 # ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
+    # Pointing to the central Data/ directory
+    DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "Data")
 
     print("=" * 60)
     print("  RLM — Tunisian Legal Documents Analysis")
@@ -277,13 +278,6 @@ if __name__ == "__main__":
     print("=" * 60)
     print(f"📚 Multi-doc query across {len(documents)} documents")
     print("-" * 60)
-    question = (
-        "Je suis un entrepreneur tunisien qui veut créer une startup. "
-        "Explique-moi le parcours complet : du choix de la forme juridique "
-        "(SARL, SUARL, SA) à l'obtention du Label Startup, en passant par "
-        "les avantages fiscaux, le congé pour création d'entreprise, "
-        "et les possibilités de financement (crowdfunding, compte en devises). "
-        "Cite les articles de loi correspondants."
-    )
+    question = "Je suis un entrepreneur tunisien qui veut créer une startup. Explique-moi le parcours complet : du choix de la forme juridique (SARL, SUARL, SA) à l'obtention du Label Startup, en passant par les avantages fiscaux, le congé pour création d'entreprise, et les possibilités de financement (crowdfunding, compte en devises). Cite les articles de loi correspondants."
     response = rlm.complete_multi(documents, question)
     print(f"\n📝 Response:\n{response}\n")

@@ -21,11 +21,19 @@ class ComplianceState(TypedDict):
     graphrag_answer: str
     graphrag_sources: List[str]
     
+    # --- A2A Routing Addition ---
+    needs_web_search: bool
+    
     web_context: str
     web_sources: List[str]
     
     final_answer: str
     final_sources: List[str]
+    
+    # --- A2A Peer-Review Additions ---
+    draft: str
+    feedback: str
+    revision_count: int
 
 # 2. Nodes (Tools)
 def node_crag(state: ComplianceState):
@@ -85,9 +93,52 @@ def node_web(state: ComplianceState):
             "web_sources": []
         }
 
-def node_synthesize(state: ComplianceState):
-    """Combine les résultats et génère la réponse finale."""
-    logger.info("[LangGraph] Synthesizing answers...")
+def node_evaluator(state: ComplianceState):
+    """Agent Évaluateur (A2A) : Vérifie si les sources locales sont suffisantes ou s'il faut scrapper le web."""
+    logger.info("[LangGraph] Agent Évaluateur : Assessing internal knowledge completeness...")
+    print("\n[A2A - Agent Évaluateur] Analyse des connaissances internes de la base de données...")
+    
+    graph_ans = state.get("graphrag_answer", "")
+    crag_ans = state.get("crag_answer", "")
+    
+    # Heuristique rapide : si GraphRAG ne trouve rien, on part sur le web direct
+    if "Désolé" in graph_ans or (not graph_ans.strip() and not crag_ans.strip()):
+        print("[A2A - Agent Évaluateur] Décision : La base de données est muette. Recours au Web obligatoire. 🌐")
+        return {"needs_web_search": True}
+        
+    llm = _build_llm()
+    system_prompt = (
+        "Tu es un évaluateur juridique de haut niveau. Ta tâche est de lire une question utilisateur "
+        "et le contexte extrait d'une base de données interne. "
+        "Si le contexte contient TOUTES les informations nécessaires pour répondre parfaitement, réponds 'OUI'. "
+        "S'il manque des informations cruciales ou que le contexte est incomplet, réponds 'NON'."
+    )
+    human_prompt = f"Question de l'utilisateur : {state['question']}\n\nContexte interne trouvé :\n{graph_ans}\n{crag_ans}\n\nLe contexte est-il suffisant ? (OUI ou NON) :"
+    
+    try:
+        response = llm.invoke([
+            SystemMessage(content=system_prompt),
+            HumanMessage(content=human_prompt)
+        ])
+        decision = response.content.strip().upper()
+        needs_web = "NON" in decision
+        logger.info(f"[LangGraph] Agent Évaluateur decision: {decision} -> Web Search Required: {needs_web}")
+        
+        if needs_web:
+            print(f"[A2A - Agent Évaluateur] Décision: {decision}. Le contexte est incomplet. Activation de l'Agent Web. 🌐")
+        else:
+            print(f"[A2A - Agent Évaluateur] Décision: {decision}. Le contexte interne est suffisant. Pas besoin du web. ✅")
+            
+        return {"needs_web_search": needs_web}
+    except Exception as e:
+        logger.error(f"[LangGraph] Evaluator error: {e}")
+        print("[A2A - Agent Évaluateur] Erreur lors de l'évaluation, Fallback sur le web par sécurité. 🌐")
+        return {"needs_web_search": True}  # Par sécurité, on scrap si erreur
+
+def node_draft(state: ComplianceState):
+    """Agent Rédacteur : Combine les résultats et génère un brouillon."""
+    logger.info("[LangGraph] Agent Rédacteur : Drafting answer...")
+    print("\n[A2A - Agent Rédacteur] Rédaction du document juridique en cours... 📝")
     llm = _build_llm()
     
     parts = []
@@ -111,9 +162,13 @@ def node_synthesize(state: ComplianceState):
     context = "\n\n".join(parts)
     
     if not context.strip():
+        # Deduplicate sources while preserving order
+        unique_sources = list(dict.fromkeys(sources))
+        print("[A2A - Agent Rédacteur] Impossible de rédiger, aucun contexte disponible.")
         return {
             "final_answer": "Désolé, je n'ai pas pu trouver d'informations pertinentes pour répondre à votre question.",
-            "final_sources": []
+            "final_sources": unique_sources,
+            "draft": "Désolé, je n'ai pas pu trouver d'informations pertinentes pour répondre à votre question."
         }
     
     system_prompt = (
@@ -130,28 +185,90 @@ def node_synthesize(state: ComplianceState):
         "3. Cite précisément les textes de loi fournis dans le contexte (numéro, date, article) sans inventer de références."
     )
     
-    human_prompt = f"Question: {state['question']}\n\nContexte combiné:\n{context}\n\nRéponse:"
+    # Intégration du feedback du réviseur s'il s'agit d'une révision
+    feedback_section = ""
+    if state.get("feedback") and state.get("feedback") != "APPROVED":
+        print(f"[A2A - Agent Rédacteur] Analyse du retour de l'Avocat Sénior : On corrige les failles signalées... 🔄")
+        feedback_section = f"\n\n/!\\ ATTENTION - RETOUR DE L'AVOCAT RÉVISEUR /!\\ :\n{state['feedback']}\nCorrige ton brouillon en fonction de ce retour."
+
+    human_prompt = f"Question: {state['question']}\n\nContexte combiné:\n{context}{feedback_section}\n\nBrouillon:"
     
     try:
         response = llm.invoke([
             SystemMessage(content=system_prompt),
             HumanMessage(content=human_prompt)
         ])
-        final_ans = _sanitize_answer_text(response.content)
+        draft_ans = _sanitize_answer_text(response.content)
+        print("[A2A - Agent Rédacteur] Brouillon terminé, envoi pour validation au Réviseur. 📨")
     except Exception as e:
-        logger.error(f"[LangGraph] Synthesis error: {e}")
-        final_ans = "Erreur lors de la génération de la synthèse finale."
+        logger.error(f"[LangGraph] Drafting error: {e}")
+        draft_ans = "Erreur lors de la génération du brouillon."
+        print("[A2A - Agent Rédacteur] Erreur lors de la rédaction.")
     
-    # Deduplicate sources while preserving order
-    unique_sources = []
-    for s in sources:
-        if s not in unique_sources:
-            unique_sources.append(s)
+    unique_sources = list(dict.fromkeys(sources))
             
     return {
-        "final_answer": final_ans, 
+        "draft": draft_ans,
+        "final_answer": draft_ans, # En attendant la validation
         "final_sources": unique_sources
     }
+
+def node_review(state: ComplianceState):
+    """Agent Réviseur : Lit le brouillon et décide s'il est validé ou nécessite correction."""
+    current_revisions = state.get("revision_count", 0)
+    print(f"\n[A2A - Agent Réviseur] Lecture critique du brouillon (Itération {current_revisions + 1}) 🧐 ...")
+    
+    # Limiter les boucles infinies (2 révisions maximum)
+    if current_revisions >= 2:
+        logger.info("[LangGraph] Agent Réviseur : Max revisions reached. Approving by default.")
+        print("[A2A - Agent Réviseur] Maximum de révisions atteint. Forçage de l'approbation pour éviter la boucle infinie. ⚠️")
+        return {"feedback": "APPROVED"}
+        
+    logger.info(f"[LangGraph] Agent Réviseur : Reviewing draft (Revision {current_revisions + 1})...")
+    llm = _build_llm()
+    
+    system_prompt = (
+        "Tu es un Avocat Senior expert en droit tunisien supervisant un juriste junior. "
+        "Tu vas lire sa réponse (le brouillon) à une question juridique. "
+        "Ta mission : vérifier que la réponse contient bien les 3 sections obligatoires "
+        "('Réponse directe', 'Conditions principales', 'Étapes pratiques') et ne dévoile pas le fonctionnement interne de l'IA.\n"
+        "SI LA RÉPONSE EST PARFAITE (respecte la structure et semble robuste juridique): retourne UNIQUEMENT le mot 'APPROVED'.\n"
+        "SI LA RÉPONSE EST DÉFICIENTE (il manque une section, le ton est mauvais, etc) : explique précisément ce qu'il faut corriger. Ne répond PAS toi-même à la question, donne juste tes consignes de correction."
+    )
+    
+    human_prompt = f"Question de l'utilisateur: {state['question']}\n\nBrouillon du junior:\n{state.get('draft', '')}\n\nTa décision (APPROVED ou remarques) :"
+    
+    try:
+        response = llm.invoke([
+            SystemMessage(content=system_prompt),
+            HumanMessage(content=human_prompt)
+        ])
+        feedback = response.content.strip()
+        
+        if feedback == "APPROVED":
+            print("[A2A - Agent Réviseur] Décision : APPROVED. Le document final est prêt ! ✅")
+        else:
+            print("[A2A - Agent Réviseur] Décision : REJETÉ. Il y a des erreurs, renvoi au Rédacteur. ❌")
+            print(f"[A2A - Agent Réviseur] -> Motif(s) : {feedback}")
+            
+    except Exception as e:
+        logger.error(f"[LangGraph] Review error: {e}")
+        feedback = "APPROVED" # En cas d'erreur de LLM, on laisse passer
+        print("[A2A - Agent Réviseur] Erreur interne pendant la révision, auto-approbation par sécurité.")
+        
+    return {
+        "feedback": feedback,
+        "revision_count": current_revisions + 1
+    }
+
+def should_continue(state: ComplianceState) -> str:
+    """Condition pour boucler ou terminer."""
+    # Si pas de recherche fructueuse d'emblée, ou si approuvé
+    if state.get("draft", "").startswith("Désolé"):
+        return "end"
+    if state.get("feedback") == "APPROVED":
+        return "end"
+    return "rewrite"
 
 # 3. Graph Definition
 def build_compliance_agent():
@@ -159,20 +276,49 @@ def build_compliance_agent():
     
     workflow.add_node("node_crag", node_crag)
     workflow.add_node("node_graphrag", node_graphrag)
+    workflow.add_node("node_evaluator", node_evaluator)
     workflow.add_node("node_web", node_web)
-    workflow.add_node("node_synthesize", node_synthesize)
+    workflow.add_node("node_draft", node_draft)
+    workflow.add_node("node_review", node_review)
     
-    # Parallel execution from START
+    # Parallel execution from START to local DBs
     workflow.add_edge(START, "node_crag")
     workflow.add_edge(START, "node_graphrag")
-    workflow.add_edge(START, "node_web")
     
-    # All nodes converge to synthesize
-    workflow.add_edge("node_crag", "node_synthesize")
-    workflow.add_edge("node_graphrag", "node_synthesize")
-    workflow.add_edge("node_web", "node_synthesize")
+    # Local DBs converge to the Evaluator
+    workflow.add_edge("node_crag", "node_evaluator")
+    workflow.add_edge("node_graphrag", "node_evaluator")
     
-    workflow.add_edge("node_synthesize", END)
+    # Routing Logic : L'évaluateur décide d'aller sur le web ou directement à la rédaction
+    def route_after_eval(state: ComplianceState) -> str:
+        if state.get("needs_web_search"):
+            return "search_web"
+        return "skip_web"
+        
+    workflow.add_conditional_edges(
+        "node_evaluator",
+        route_after_eval,
+        {
+            "search_web": "node_web",
+            "skip_web": "node_draft"
+        }
+    )
+    
+    # Si on est allé sur le web, la prochaine étape est la rédaction
+    workflow.add_edge("node_web", "node_draft")
+    
+    # Le brouillon part en review
+    workflow.add_edge("node_draft", "node_review")
+    
+    # Conditional edge A2A pour valider le brouillon
+    workflow.add_conditional_edges(
+        "node_review", 
+        should_continue, 
+        {
+            "rewrite": "node_draft",
+            "end": END
+        }
+    )
     
     return workflow.compile()
 

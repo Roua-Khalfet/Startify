@@ -1,586 +1,605 @@
-# Startify Platform 🚀
+<div align="center">
 
-**Integrated AI Platform for Tunisian Startups** — Combines ComplianceGuard (legal compliance assistant) and TeamBuilder (AI-powered recruitment) in one unified platform.
+# ⚡ NEXAURA PLATFORM
+### *The Autonomous AI Operating System for Tunisian Startups & Venture Compliance*
 
----
+[![License: MIT](https://img.shields.io/badge/License-MIT-emerald.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
+[![Python 3.12+](https://img.shields.io/badge/Python-3.12%2B-blue.svg?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![Next.js 16](https://img.shields.io/badge/Next.js-16.2-black.svg?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
+[![React 19](https://img.shields.io/badge/React-19-61DAFB.svg?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
+[![Django 5](https://img.shields.io/badge/Django-5.0-092E20.svg?style=for-the-badge&logo=django&logoColor=white)](https://www.djangoproject.com/)
+[![Neo4j](https://img.shields.io/badge/Neo4j-5.15-008CC1.svg?style=for-the-badge&logo=neo4j&logoColor=white)](https://neo4j.com/)
+[![Qdrant](https://img.shields.io/badge/Qdrant-Vector_DB-dc2626.svg?style=for-the-badge&logo=qdrant&logoColor=white)](https://qdrant.tech/)
+[![Docker](https://img.shields.io/badge/Docker-Compose-2496ED.svg?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 
-## 📋 Description
-
-Startify is a comprehensive AI platform that helps Tunisian entrepreneurs with:
-
-### ComplianceGuard Module
-Legal compliance assistant that helps navigate the **Startup Act** regulatory framework. The system combines five specialized agents around a hybrid architecture:
-
-- **Vector DB** (Qdrant) — Recherche sémantique par similarité sur les chunks de texte juridique
-- **Knowledge Graph** (Neo4j) — Graphe de relations entre lois, articles, organismes et obligations
-- **CRAG** (Corrective RAG) — Pipeline avancé d'évaluation et de raffinement des documents récupérés
-- **Agent Web** — Fallback automatique vers la recherche Google + scraping quand la base locale est insuffisante
-- **Agent Rédacteur** — Génération de documents juridiques (statuts, CGU, contrats, demande de label)
-- **Agent Veille** — Surveillance des changements réglementaires sur les sites officiels tunisiens
-- **Frontend Next.js** + **Backend Django REST** — Interface complète avec 6 sections intégrées
-
-### TeamBuilder Module
-AI-powered recruitment platform that helps HR professionals:
-- **CV Upload & Parsing** — Upload PDF, DOCX, or image CVs with automatic data extraction using LLM
-- **Candidate Pool Management** — Organize and filter candidates by seniority, skills, and availability
-- **AI Team Builder** — Describe your project needs and get AI-recommended team compositions
-- **Email Invitations** — Send professional job invitations directly from your Gmail account
-- **Dashboard Analytics** — Track candidates, invitations, acceptance rates, and skill distributions
+<p align="center">
+  <a href="#-overview">Overview</a> •
+  <a href="#-core-pillars">Core Pillars</a> •
+  <a href="#-system-architecture">Architecture</a> •
+  <a href="#-interactive-modules">Modules</a> •
+  <a href="#-quick-start">Quick Start</a> •
+  <a href="#-service-topology--ports">Port Matrix</a> •
+  <a href="#-api-reference">API Reference</a> •
+  <a href="#-test-guide">Testing</a> •
+  <a href="#-roadmap">Roadmap</a>
+</p>
 
 ---
 
-## 🏗️ Architecture Globale
+</div>
+
+## 🌟 Overview
+
+**Nexaura** is an enterprise-grade, multi-agent AI copilot engineered specifically for the Tunisian startup and venture ecosystem. Navigating the regulatory landscape (**Startup Act Law No. 2018-20**, BCT foreign exchange circulars, INPDP data privacy regulations, and Commercial Companies Code) is often slow, fragmented, and prone to costly compliance errors.
+
+Nexaura bridges this gap by unifying **Autonomous Legal Intelligence**, **AI-Powered Technical Advisory**, **ESG & Green Compliance Auditing**, and **Cognitive Talent Acquisition (TeamBuilder)** into a single, cohesive, high-performance platform.
 
 ```
-Startify Platform
-├── ComplianceGuard Backend (Django) - Port 8000
-│   ├── GraphRAG + CRAG agents
-│   ├── Document generation
-│   ├── Compliance scoring
-│   └── Uses: Neo4j (7687), Qdrant (6333), SQLite
-│
-├── TeamBuilder Backend (Django) - Port 8001
-│   ├── CV Upload & Parsing
-│   ├── Candidate Management
-│   ├── AI Team Builder (LangGraph)
-│   └── Uses: PostgreSQL (5433), Redis (6380), ChromaDB
-│
-└── Frontend (Next.js) - Port 3000
-    ├── ComplianceGuard sections (Chat, Documents, Conformité, Quiz, Veille, Graphe)
-    └── TeamBuilder sections (Dashboard, AI Assistant, Upload CVs, Candidates, History)
+                                  ┌────────────────────────┐
+                                  │   NEXAURA PLATFORM     │
+                                  │  Startup Intelligence  │
+                                  └───────────┬────────────┘
+                                              │
+         ┌───────────────────┬────────────────┴────────────────┬───────────────────┐
+         ▼                   ▼                                 ▼                   ▼
+ 🛡️ ComplianceGuard    👥 TeamBuilder                    🌿 Green & ESG       ⚡ Tech Advisor
+   • GraphRAG (Neo4j)   • CV Ingestion & Parsing (OCR)    • ESG Scoring       • Stack Analysis
+   • CRAG Verification  • Vector Candidate Matching      • Carbon Audit      • Scalability Map
+   • RLM Big-Doc REPL   • LangGraph Team Assembly         • Green Labels      • Architecture AI
+   • A2A Legal Drafter  • Gmail OAuth Outreach Engine     • Circular Economy  • Port 8005 API
 ```
+
+---
+
+## 💎 Core Pillars
+
+<table>
+  <tr>
+    <td width="50%">
+      <h3>🛡️ ComplianceGuard (Legal AI)</h3>
+      <ul>
+        <li><b>GraphRAG Relational Search:</b> Dual retrieval traversing Neo4j knowledge graphs and Qdrant vector spaces across 60+ Tunisian legal texts.</li>
+        <li><b>CRAG (Corrective RAG):</b> Algorithmic triangulation (30% Semantic, 40% Graph Veracity, 30% Web Freshness) with knowledge-strip refinement.</li>
+        <li><b>RLM (Recursive Language Model):</b> Sandboxed Python REPL execution loop bypassing LLM context window limits for massive legal dossiers.</li>
+        <li><b>Agent-to-Agent (A2A) Review:</b> Multi-agent validation loop between <i>Evaluator</i>, <i>Drafter</i>, and <i>Senior Lawyer Reviewer</i>.</li>
+        <li><b>Regulatory Watchdog (Veille):</b> Real-time scraping and SHA-256 diff detection on official government portals (<code>startup.gov.tn</code>, <code>bct.gov.tn</code>, <code>apii.tn</code>).</li>
+      </ul>
+    </td>
+    <td width="50%">
+      <h3>👥 TeamBuilder (AI Talent Engine)</h3>
+      <ul>
+        <li><b>Multimodal CV Ingestion:</b> Automatic parsing and structured extraction from PDF, DOCX, and scanned image resumes.</li>
+        <li><b>Semantic Candidate Pool:</b> ChromaDB vector indexing paired with PostgreSQL relational profiles and availability tracking.</li>
+        <li><b>LangGraph AI Recruiter:</b> Conversational agent for team composition, salary benchmarks, and role-candidate matching.</li>
+        <li><b>Automated Outreach:</b> Direct recruitment email generation and dispatch via integrated Google OAuth & Gmail API.</li>
+        <li><b>HR Analytics:</b> Real-time pipeline visualizer, acceptance ratios, and skill density distribution charts.</li>
+      </ul>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <h3>🌿 Green & ESG Analytics</h3>
+      <ul>
+        <li><b>Eco-Compliance Scoring:</b> Quantitative assessment of environmental, social, and governance compliance for green venture capital.</li>
+        <li><b>Sustainable Innovation Audit:</b> Evaluates alignment with ecological standards and green startup subsidies.</li>
+        <li><b>Actionable Sustainability Roadmap:</b> Step-by-step remediation plans to achieve national and international green certifications.</li>
+      </ul>
+    </td>
+    <td width="50%">
+      <h3>⚡ Technical Advisor Agent</h3>
+      <ul>
+        <li><b>Architectural Diagnostics:</b> Microservices vs. monolith trade-off assessment tailored to startup stage and budget.</li>
+        <li><b>Tech Stack Optimization:</b> Automated evaluation of database, backend, frontend, and cloud hosting infrastructure.</li>
+        <li><b>Scalability & Security Roadmap:</b> Hardening guidelines for GDPR/INPDP data isolation, API rate limiting, and CI/CD automation.</li>
+      </ul>
+    </td>
+  </tr>
+</table>
+
+---
+
+## 🏗️ System Architecture
+
+Nexaura is engineered as a decoupled, microservices-oriented distributed system.
+
+```mermaid
+flowchart TB
+    subgraph ClientLayer["🎨 User Interface Layer (Port 3000)"]
+        UI["Next.js 16 App Router\n(React 19 · TailwindCSS 4 · Radix UI · xyflow)"]
+        Sidebar["Interactive Sidebar Navigation\n(Studio · Audit · Market · Green · Tech · Documents · Chat · Veille · TeamBuilder)"]
+        UI --> Sidebar
+    end
+
+    subgraph GatewayRouting["🌐 API Routing & Security"]
+        HTTP8000["ComplianceGuard & Studio API\n(Django REST - :8000)"]
+        HTTP8001["TeamBuilder Engine API\n(Django REST - :8001)"]
+        HTTP8005["Technical Advisor API\n(FastAPI - :8005)"]
+    end
+
+    UI -->|"Compliance & Studio Requests"| HTTP8000
+    UI -->|"Recruitment & HR Requests"| HTTP8001
+    UI -->|"Tech Advisory Requests"| HTTP8005
+
+    subgraph LegalHemisphere["🛡️ ComplianceGuard Core Engine"]
+        GRAG["GraphRAG Hybrid Retriever"]
+        CRAG_PIPE["CRAG Triangulation & Grading"]
+        RLM_SANDBOX["RLM Recursive Python REPL"]
+        A2A_GRAPH["A2A Multi-Agent Orchestrator\n(Evaluator ➔ Drafter ➔ Reviewer)"]
+        WATCHDOG["Veille Web Watchdog\n(Scraper + SHA-256 Hashing)"]
+        DOC_GEN["Agent Rédacteur\n(Statuts · CGU · Label · Contrats)"]
+
+        HTTP8000 --> GRAG
+        HTTP8000 --> CRAG_PIPE
+        HTTP8000 --> RLM_SANDBOX
+        HTTP8000 --> A2A_GRAPH
+        HTTP8000 --> WATCHDOG
+        HTTP8000 --> DOC_GEN
+    end
+
+    subgraph TeamBuilderHemisphere["👥 TeamBuilder Core Engine"]
+        CV_PARSER["CV Parser & OCR (Unstructured / LLM)"]
+        LG_AGENT["LangGraph Team Assembly Agent"]
+        SALARY_DB["Salary Intelligence Engine"]
+        GMAIL_AUTH["Google OAuth2 & Gmail Dispatcher"]
+
+        HTTP8001 --> CV_PARSER
+        HTTP8001 --> LG_AGENT
+        HTTP8001 --> SALARY_DB
+        HTTP8001 --> GMAIL_AUTH
+    end
+
+    subgraph DataStorageLayer["🗄️ Storage & Vector Engines"]
+        NEO4J[("Neo4j 5.15\n(Legal Knowledge Graph)\n:7474 / :7687")]
+        QDRANT[("Qdrant Vector DB\n(Legal & User Embeddings)\n:6333")]
+        POSTGRES[("PostgreSQL 16\n(TeamBuilder Candidates & Jobs)\n:5433")]
+        REDIS[("Redis 7\n(State Caching & Queues)\n:6380 / :6381")]
+        CHROMADB[("ChromaDB\n(Candidate Resume Vectors)")]
+        SQLITE[("SQLite / Checkpoints\n(Session State)")]
+
+        GRAG <--> NEO4J
+        GRAG <--> QDRANT
+        CRAG_PIPE <--> QDRANT
+        LG_AGENT <--> CHROMADB
+        CV_PARSER --> POSTGRES
+        SALARY_DB <--> POSTGRES
+        HTTP8001 <--> REDIS
+        HTTP8005 <--> REDIS
+    end
+
+    subgraph AIProviders["🧠 Inference & Embedding Layer"]
+        OLLAMA["Ollama Local Engine\n(qwen3-embedding:0.6b · llama3.1 · llama3.2)\n:11434"]
+        GROQ["Groq Cloud\n(Llama-3.3-70B · Llama-4-Scout)"]
+        AZURE["Azure OpenAI\n(GPT-4o · Resilient Fallback)"]
+        SERPER["Google Serper API\n(Live Legal Web Search)"]
+
+        GRAG <--> OLLAMA
+        CRAG_PIPE <--> SERPER
+        RLM_SANDBOX <--> GROQ
+        RLM_SANDBOX <--> AZURE
+        A2A_GRAPH <--> GROQ
+        LG_AGENT <--> GROQ
+    end
+```
+
+---
+
+## 🔍 Deep-Dive: The Multi-Agent Intelligence Engines
+
+### 1. Dual-Hemisphere ComplianceGuard Engine
+
+ComplianceGuard is split into two synchronized functional hemispheres:
+
+```
+┌─────────────────────────────────────────┐       ┌─────────────────────────────────────────┐
+│     HEMISPHERE A: DEEP LEGAL REASONING  │       │   HEMISPHERE B: COMPLIANCE & EXECUTION  │
+├─────────────────────────────────────────┤       ├─────────────────────────────────────────┤
+│ • GraphRAG: Multi-hop graph traversal   │  ───► │ • Triangulation Compliance Scoring (0-100)│
+│ • CRAG: Mathematical veracity grading   │       │ • A2A Multi-Agent Drafting Loop         │
+│ • RLM: 10-cycle sandboxed REPL analysis │       │ • Regulatory Watchdog (SHA-256 Diffs)   │
+│ • Hybrid fallback to live Serper Search │       │ • Legal Contract & Label Generator      │
+└─────────────────────────────────────────┘       └─────────────────────────────────────────┘
+```
+
+#### A. Algorithmic Triangulation Scoring Formula (CRAG)
+Retrieved legal documents undergo deterministic evaluation prior to synthesis:
+
+$$\text{Score} = 0.30 \cdot \mathcal{S}_{\text{semantic}} + 0.40 \cdot \mathcal{V}_{\text{graph\_veracity}} + 0.30 \cdot \mathcal{F}_{\text{web\_freshness}}$$
+
+- $\mathcal{S}_{\text{semantic}}$: Cosine similarity vector distance between query and legal chunk.
+- $\mathcal{V}_{\text{graph\_veracity}}$: Existence check of cited legal articles as valid nodes in Neo4j.
+- $\mathcal{F}_{\text{web\_freshness}}$: Verification against live official Gazette circulars via Serper search.
+
+$$\text{Strategy} = \begin{cases} 
+\text{Use Direct Documents} & \text{if Score } \ge 0.6 \\ 
+\text{Live Web Search Fallback} & \text{if Score } < -0.2 \\ 
+\text{Combine Internal + Web Context} & \text{otherwise} 
+\end{cases}$$
+
+#### B. Recursive Language Model (RLM)
+When analyzing massive multi-hundred-page company bylaws or investment prospectuses, RLM offloads document text to a sandboxed Python REPL. The LLM generates code queries to parse, aggregate, and inspect sections dynamically across up to 10 recursive loops without overflowing context tokens.
+
+#### C. Agent-to-Agent (A2A) Validation Loop
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User as Founder / Legal Officer
+    participant Orch as A2A Orchestrator
+    participant Eval as Evaluator Agent
+    participant Draft as Drafter Agent (Jurist)
+    participant Rev as Reviewer Agent (Senior Lawyer)
+    participant Out as Final Output
+
+    User->>Orch: Submit Legal Inquiry or Document Dossier
+    Orch->>Eval: Assess retrieved Graph & Vector context
+    alt Context Insufficient
+        Eval->>Orch: Trigger Serper Web Search
+    end
+    Orch->>Draft: Provide enriched legal context
+    Draft->>Draft: Generate Draft (Direct Answer · Conditions · Practical Steps)
+    Draft->>Rev: Submit for Strict Legal Review
+    alt Review Rejected (Max 2 cycles)
+        Rev->>Draft: Send actionable correction feedback
+        Draft->>Draft: Revise and re-cite articles
+        Draft->>Rev: Re-submit
+    end
+    Rev->>Out: Mark APPROVED & render structured response
+    Out->>User: Display verified legal guidance & citations
+```
+
+---
+
+### 2. TeamBuilder AI Recruitment Engine
+
+TeamBuilder transforms unstructured hiring into an automated, quantitative recruitment workflow:
+
+1. **Resume Processing:** Upload PDF/DOCX/Images $\rightarrow$ Multimodal OCR & structured JSON conversion (Skills, Experience, Education, Contact).
+2. **Vector Indexing:** Candidate profiles embedded into ChromaDB with metadata filters (Seniority, Salary Expectation, Availability).
+3. **LangGraph Team Assembly:** State-machine agent analyzes project briefs, computes optimal role allocations, and queries candidate pools for highest skill match.
+4. **Automated Outreach:** Generates personalized offer/interview letters and sends them through authenticated Google OAuth Gmail API.
+
+---
+
+## 🖥️ Interactive Modules
+
+| Section | Icon | Path / Port | Primary Capability |
+|---|:---:|:---:|---|
+| **Studio Startup** | 🎛️ | `/` (`:3000`) | Unified executive dashboard combining Legal, Market, Green, and Tech scores. |
+| **Audit Juridique** | 🛡️ | `/audit` (`:8000`) | Weighted compliance audit across 5 legal axes with real-time gauge scoring. |
+| **Chat Juridique** | 💬 | `/chat` (`:8000`) | Conversational GraphRAG/CRAG assistant with PDF upload and article citations. |
+| **Documents** | 📝 | `/documents` (`:8000`) | Generation of company statutes (SUARL/SARL/SA), CGU, and investment pacts. |
+| **Quiz Conformité** | 🧠 | `/quiz` (`:3000`) | 22-question self-diagnostic test across 9 regulatory domains. |
+| **Veille Légale** | 📡 | `/veille` (`:8000`) | Automated watcher monitoring regulatory updates on Tunisian official portals. |
+| **Graphe de Lois** | 🔗 | `/graph` (`:8000`) | Interactive ReactFlow/xyflow visualization of the Neo4j legal ontology. |
+| **Analyse Marché** | 📈 | `/marketing` (`:8000`) | Market sizing (TAM/SAM/SOM), competitor matrices, and growth trajectories. |
+| **Analyse Verte** | 🌿 | `/green` (`:8000`) | ESG diagnostic scoring and sustainability compliance for green startups. |
+| **Tech Advisor** | ⚡ | `/tech-agent` (`:8005`) | Architectural recommendations, tech stack validation, and scaling roadmaps. |
+| **TeamBuilder Dashboard** | 📊 | `/tb-dashboard` (`:8001`) | HR metrics, pipeline statuses, acceptance velocity, and candidate rosters. |
+| **TB AI Assistant** | 🤖 | `/tb-ai` (`:8001`) | Conversational recruiter for team composition and salary benchmarks. |
+| **TB Upload CVs** | 📤 | `/tb-upload` (`:8001`) | Drag-and-drop batch resume parser with OCR and entity extraction. |
+| **TB Candidates** | 👥 | `/tb-candidates` (`:8001`) | Searchable candidate pool with vector filtering and direct email outreach. |
+
+---
+
+## 📚 Integrated Tunisian Legal Corpus
+
+Nexaura comes pre-indexed with comprehensive official legal texts:
+
+| Legal Reference | Official Title | Scope & Coverage |
+|---|---|---|
+| **Loi n° 2018-20** | *Startup Act* | Startup Label, tax exemptions (IS 4 years), founder leave, tech card. |
+| **Décret n° 2018-840** | *Décret d'application Startup Act* | Label qualification conditions, College of Startups procedures. |
+| **Circulaire BCT 2019-01** | *Circulaire Banque Centrale de Tunisie* | Special foreign currency accounts for labeled startups. |
+| **Circulaire BCT 2019-02** | *Carte Technologique Internationale* | International payment quota limits, digital service purchases. |
+| **Code des Sociétés** | *Code des Sociétés Commerciales* | SUARL, SARL, SA, minimum capital rules, statutory requirements. |
+| **Loi n° 2004-63** | *Protection des Données Personnelles* | INPDP compliance, privacy notices, user consent, biometric data. |
+| **Loi n° 2000-83** | *Échanges et Commerce Électronique* | E-commerce obligations, electronic contracts, digital signatures. |
+| **Loi n° 2016-71** | *Loi sur l'Investissement* | APII incentives, regional development funds, foreign investment. |
+| **Code du Travail** | *Code du Travail Tunisien* | Employment contracts (CDI, CDD, SIVP), termination, social security (CNSS). |
+| **Code Fiscal 2023** | *Droits et Procédures Fiscaux* | Corporate tax declarations, VAT withholding, fiscal audit preparation. |
+
+---
+
+## 🌐 Service Topology & Ports
+
+| Service | Container / Process | Host Port | Internal Port | Protocol | Purpose |
+|---|---|:---:|:---:|:---:|---|
+| **Frontend UI** | `nextjs-app` | **`3000`** | `3000` | HTTP | Next.js 16 Unified User Interface |
+| **ComplianceGuard API** | `startify-backend` | **`8000`** | `8000` | HTTP | Django REST Core Backend & RAG API |
+| **TeamBuilder API** | `teambuilder-backend` | **`8001`** | `8000` | HTTP | TeamBuilder LangGraph & HR Backend |
+| **Tech Advisor API** | `tech-agent-api` | **`8005`** | `8000` | HTTP | FastAPI Technical Advisor Microservice |
+| **Neo4j Browser** | `startify-neo4j` | **`7474`** | `7474` | HTTP | Knowledge Graph Visual Web Console |
+| **Neo4j Bolt** | `startify-neo4j` | **`7687`** | `7687` | Bolt | Binary Graph Query Connection |
+| **Qdrant Vector DB** | `startify-qdrant` | **`6333`** | `6333` | HTTP | ComplianceGuard Vector Collections |
+| **PostgreSQL (TeamBuilder)** | `teambuilder-postgres` | **`5433`** | `5432` | TCP | Relational Candidate & Job Store |
+| **Redis (TeamBuilder)** | `teambuilder-redis` | **`6380`** | `6379` | TCP | Caching & Async Task Broker |
+| **Redis (Tech Agent)** | `tech-agent-redis` | **`6381`** | `6379` | TCP | Isolated Tech Agent Cache Store |
+| **Qdrant (Tech Agent)** | `tech-agent-qdrant` | **`6335`** | `6333` | HTTP | Isolated Tech Agent Vector Store |
+| **Langfuse (Optional)** | `langfuse` | **`3001`** | `3000` | HTTP | LLM Observability & Trace Analytics |
 
 ---
 
 ## 🚀 Quick Start
 
-### Prerequisites
-- **Python 3.12+**
-- **Node.js 18+**
-- **Docker Desktop** (for databases)
-- **[Ollama](https://ollama.com/download)** (for embeddings)
-- Clé API **Groq** ou **Azure OpenAI**
-- Clé API **Serper** (recherche web)
+### 📋 Prerequisites
 
-### Step 1: Start Docker Services
+- **Python 3.12+** (with `pip` and `virtualenv`)
+- **Node.js 18+** / **npm 9+**
+- **Docker Desktop** (running with Compose v2)
+- **[Ollama](https://ollama.com/download)** installed locally
+- API Keys: **Groq API Key**, **Google Serper API Key**, and optional **Azure OpenAI** / **Google OAuth Client ID**
+
+---
+
+### Step 1: Clone the Repository
 
 ```bash
-cd Startify
+git clone https://github.com/Roua-Khalfet/Compliance-Startup.git
+cd Compliance-Startup
+```
 
-# Start ComplianceGuard services (Neo4j + Qdrant)
-.\scripts\start-local-stack.ps1
+---
 
-# Start TeamBuilder services (PostgreSQL + Redis)
+### Step 2: Provision Local Databases (Docker)
+
+```bash
+# 1. Start ComplianceGuard Data Stack (Neo4j + Qdrant)
+powershell -ExecutionPolicy Bypass -File .\scripts\start-local-stack.ps1
+
+# 2. Start TeamBuilder Data Stack (PostgreSQL + Redis)
 cd backend/teambuilder
+docker compose up -d
+cd ../..
+
+# 3. (Optional) Start Tech Advisor Data Stack (Redis + Qdrant)
+cd backend/tech-agent
 docker compose up -d
 cd ../..
 ```
 
-### Step 2: Configure Environment
+---
 
-**ComplianceGuard (.env in Startify root):**
+### Step 3: Configure Environment Variables
+
+Create the `.env` files from templates:
+
 ```bash
+# Root environment (ComplianceGuard & Studio)
 cp .env.example .env
-# Edit .env with your credentials
+
+# TeamBuilder environment
+cp backend/teambuilder/.env.example backend/teambuilder/.env
+
+# Frontend environment
+cp frontend/.env.example frontend/.env.local
 ```
 
-**TeamBuilder (.env in backend/teambuilder):**
+> [!TIP]
+> Ensure you update your `GROQ_API_KEY`, `SERPER_API_KEY`, and `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` in both root and `backend/teambuilder/.env`.
+
+---
+
+### Step 4: Pull Local AI Models (Ollama)
+
 ```bash
-cd backend/teambuilder
-# Edit .env with your Google OAuth credentials
-# IMPORTANT: Update redirect URI to http://localhost:8001/api/v1/auth/google/callback
+# High-performance multilingual embedding model
+ollama pull qwen3-embedding:0.6b
+
+# Local inference models
+ollama pull llama3.2
+ollama pull llama3.1
 ```
 
-### Step 3: Install Dependencies & Run Migrations
+---
 
-**ComplianceGuard:**
+### Step 5: Setup Python Virtual Environment & Migrations
+
 ```bash
-cd Startify
+# Create and activate Python virtualenv
 python -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
+# Windows:
+.venv\Scripts\activate
+# Linux/macOS:
+source .venv/bin/activate
+
+# Install root dependencies
 pip install -r requirements.txt
 
+# Run ComplianceGuard migrations
 cd backend
 python manage.py migrate
+cd ..
+
+# Run TeamBuilder migrations
+cd backend/teambuilder
+python manage.py migrate
+cd ../..
 ```
 
-**TeamBuilder:**
+---
+
+### Step 6: Ingest Legal Corpus (First-Time Setup)
+
+To build the Neo4j Knowledge Graph and vectorize the legal chunks into Qdrant:
+
 ```bash
-cd Startify/backend/teambuilder
-# Use the same .venv from Startify
-../../.venv/bin/python manage.py migrate
+python complianceguard/ingest.py
 ```
 
-### Step 4: Download Ollama Model
+---
+
+### Step 7: Launch All Services
+
+Launch each service in a dedicated terminal window:
+
+<details open>
+<summary><b>💻 Terminal 1 — ComplianceGuard & Studio Backend (Port 8000)</b></summary>
 
 ```bash
-ollama pull qwen3-embedding:0.6b
-ollama pull llama3.2
+cd backend
+python manage.py runserver 0.0.0.0:8000
 ```
+</details>
 
-### Step 5: Start Backends (2 terminals)
+<details open>
+<summary><b>👥 Terminal 2 — TeamBuilder Backend (Port 8001)</b></summary>
 
-**Terminal 1 - ComplianceGuard Backend:**
 ```bash
-cd Startify/backend
-python manage.py runserver
-# Runs on http://localhost:8000
+cd backend/teambuilder
+python manage.py runserver 0.0.0.0:8001
 ```
+</details>
 
-**Terminal 2 - TeamBuilder Backend:**
+<details>
+<summary><b>⚡ Terminal 3 — Technical Advisor Agent Backend (Port 8005 - Optional)</b></summary>
+
 ```bash
-cd Startify/backend/teambuilder
-../../.venv/bin/python manage.py runserver 8001
-# Runs on http://localhost:8001
+cd backend/tech-agent
+uvicorn technical_advisor_agent.main:app --host 0.0.0.0 --port 8005 --reload
 ```
+</details>
 
-### Step 6: Start Frontend
+<details open>
+<summary><b>🎨 Terminal 4 — Next.js Frontend (Port 3000)</b></summary>
 
-**Terminal 3:**
 ```bash
-cd Startify/frontend
-npm install  # First time only
+cd frontend
+npm install
 npm run dev
-# Runs on http://localhost:3000
 ```
+</details>
 
-### Step 7: Access Application
-
-Open browser: **http://localhost:3000**
+Open your browser at **[http://localhost:3000](http://localhost:3000)** to access the Nexaura workspace.
 
 ---
 
-## 🖥️ Interface Web — Sections Intégrées
+## 🔌 API Reference
 
-### ComplianceGuard Sections (Port 8000)
+### ComplianceGuard & Studio Endpoints (`http://localhost:8000`)
 
-| Section | Description | Backend |
-|---------|-------------|---------|
-| 💬 **Chat Juridique** | Chat avec GraphRAG (base juridique) ou CRAG (documents uploadés). Toggle kb/notebook, upload PDF intégré, questions suggérées | `POST /api/chat/` + `POST /api/upload/` |
-| 📝 **Documents** | Génération de statuts, CGU, contrats d'investissement, demande de label. Formulaire complet + preview + téléchargement | `POST /api/documents/` |
-| ✅ **Conformité** | Analyse de conformité avec scoring pondéré. Choix du secteur, jauge animée, critères détaillés avec articles de loi | `POST /api/conformite/` |
-| 🧠 **Quiz Conformité** | Auto-évaluation : 10 questions aléatoires sur la conformité de VOTRE société. Score pondéré par domaine + recommandations | Client-side (22 questions, 9 catégories) |
-| 📡 **Veille** | Surveillance des sites officiels (startup.gov.tn, BCT, APII). Statut OK/changé, date du dernier check | `GET /api/veille/` |
-| 🔗 **Graphe de Lois** | Visualisation des nœuds Neo4j (lois, articles, entités) avec relations colorées, sélection interactive, zoom | `GET /api/graph/` |
+| Method | Endpoint | Description | Request Body Example |
+|---|---|---|---|
+| `POST` | `/api/chat/` | Query GraphRAG (`mode: "kb"`) or CRAG (`mode: "notebook"`) | `{"message": "Avantages fiscaux Startup Act ?", "mode": "kb"}` |
+| `POST` | `/api/upload/` | Ingest user PDF into isolated Qdrant collection | `multipart/form-data; file=@document.pdf` |
+| `POST` | `/api/conformite/` | Comprehensive legal scoring on 5 regulatory criteria | `{"nom": "NexPay", "secteur": "Fintech", "capital": 50000, "description": "..."}` |
+| `POST` | `/api/documents/` | Generate ready-to-sign legal contract or bylaws | `{"type_doc": "statuts", "forme_juridique": "SUARL", "capital": 5000, ...}` |
+| `GET` | `/api/graph/` | Retrieve nodes and links for Neo4j ReactFlow visualizer | `None` |
+| `GET` | `/api/veille/` | Check status of government portal scrapers and hash diffs | `None` |
+| `POST` | `/api/suggestions/` | Get context-aware legal questions by startup sector | `{"secteur": "HealthTech"}` |
 
-### TeamBuilder Sections (Port 8001)
+### TeamBuilder Endpoints (`http://localhost:8001`)
 
-| Section | Description | Backend |
-|---------|-------------|---------|
-| 📊 **Dashboard** | Analytics dashboard with metrics, charts, and recent activity | `GET /api/v1/stats` |
-| 🤖 **AI Assistant** | 4 conversational workflows: Build Team, Salary Intelligence, Candidate Matching, Job Management | `POST /api/v1/team-builder` |
-| 📤 **Upload CVs** | Drag & drop CV upload with automatic parsing (PDF, DOCX, images) | `POST /api/v1/hr/upload-cv` |
-| 👥 **Candidates** | Browse and manage candidate pool with filters and search | `GET /api/v1/hr/candidates` |
-| 📜 **History** | View past team building searches and recommendations | `GET /api/v1/sessions` |
+| Method | Endpoint | Description | Request Body Example |
+|---|---|---|---|
+| `GET` | `/api/v1/stats` | Retrieve aggregate candidate count, job openings, and email stats | `None` |
+| `POST` | `/api/v1/hr/upload-cv` | Parse and vectorize uploaded resume file | `multipart/form-data; file=@resume.pdf` |
+| `GET` | `/api/v1/hr/candidates` | List and filter candidate pool by seniority, skill, status | Query params: `?skill=Python&seniority=Senior` |
+| `POST` | `/api/v1/team-builder` | LangGraph multi-step team assembly workflow | `{"prompt": "Build a seed-stage team for an AI healthtech startup"}` |
+| `POST` | `/api/v1/send-invitation`| Dispatch interview invitation email via Google OAuth | `{"candidate_id": 42, "subject": "Interview", "body": "..."}` |
 
 ---
 
-## 📁 Structure Complète du Projet
+## 🧪 Test Guide & Scenario Validation
+
+Validate platform intelligence using the following benchmark test cases:
 
 ```
-AI project/
-│
-├── complianceguard/                 # ⚙️ Core Engine (Python)
-│   ├── __init__.py
-│   ├── config.py                    # Configuration centralisée (Pydantic Settings)
-│   ├── ask_question.py              # Agent GraphRAG — Q&A sur base juridique + web fallback
-│   ├── crag.py                      # Pipeline CRAG — Grade, Refine, Rewrite, Answer
-│   ├── chain.py                     # Agent Web LangChain avec bind_tools (Serper + Scraping)
-│   ├── main.py                      # Point d'entrée CLI de l'Agent Web
-│   ├── ingest.py                    # Ingestion PDFs → Neo4j (GraphRAG) + Qdrant (Vectors)
-│   ├── document_utils.py            # Conversion documents (Unstructured/pypdf) + chunking sémantique
-│   ├── agent_redacteur.py           # Agent de rédaction de documents juridiques
-│   ├── agent_veille.py              # Agent de surveillance réglementaire (scraping + hash)
-│   ├── config/
-│   │   ├── agents.yaml              # Définition du rôle de l'agent de conformité
-│   │   └── tasks.yaml               # Définition des tâches de recherche
-│   ├── tools/
-│   │   ├── __init__.py
-│   │   ├── retriever.py             # HybridRetriever (Qdrant + Neo4j + Ollama)
-│   │   ├── graph_agent.py           # LangChain Tools : RAG chain, Graph QA, Compliance Check
-│   │   └── custom_tool.py           # Template d'outil personnalisé
-│   └── tests/
-│       ├── __init__.py
-│       └── graphrag_suite.py        # Suite de tests GraphRAG
-│
-├── backend/                          # 🖥️ API REST (Django)
-│   ├── manage.py
-│   ├── config/
-│   │   ├── settings.py               # Django settings (CORS, REST Framework)
-│   │   ├── urls.py                    # URL routing principal
-│   └── api/
-│       ├── urls.py                    # Routes : /chat, /upload, /conformite, /documents, /graph, /veille
-│       ├── serializers.py             # Serializers DRF
-│       └── views.py                   # Vues API + Moteur de scoring conformité
-│
-├── frontend/                         # 🎨 Interface Web (Next.js 16 + TailwindCSS 4)
-│   ├── package.json                  # React 19, Radix UI, Recharts, Lucide
-│   ├── app/
-│   │   ├── layout.tsx                # Layout principal avec ThemeProvider
-│   │   ├── page.tsx                  # Page racine : Sidebar + Section routing
-│   │   └── globals.css               # Design system (gradients, glassmorphism, animations)
-│   ├── components/
-│   │   ├── app-sidebar.tsx           # ★ Sidebar navigation avec 6 sections colorées
-│   │   ├── chat-section.tsx          # ★ Chat GraphRAG + CRAG + Upload PDF
-│   │   ├── documents-section.tsx     # ★ Générateur de documents juridiques
-│   │   ├── conformite-section.tsx    # ★ Analyse de conformité avec scoring
-│   │   ├── quiz-section.tsx          # ★ Quiz auto-évaluation conformité (22 questions)
-│   │   ├── veille-section.tsx        # ★ Veille réglementaire
-│   │   ├── graph-section.tsx         # ★ Visualisation Knowledge Graph
-│   │   └── ui/                       # Composants ShadCN/UI (57 composants)
-│   └── lib/
-│       ├── api.ts                    # Client HTTP complet (7 fonctions API)
-│       └── utils.ts                  # Utilitaires (cn helper)
-│
-├── Data/                             # 📚 Documents juridiques sources (12 PDFs)
-│   ├── Loi_2018_20_FR.pdf            # Startup Act
-│   ├── Decret_2018_840_Startup.pdf   # Décret d'application
-│   ├── Circulaire_2019_01_FR.pdf     # Circulaire BCT (comptes devises)
-│   ├── Circulaire_2019_02_FR.pdf     # Circulaire BCT (carte technologique)
-│   ├── Code_Societes_Commerciales_FR.pdf
-│   ├── Code_Droits_Procedures_Fiscaux_2023.pdf
-│   ├── Code_Travail_FR.pdf
-│   ├── Loi_63-2004_FR.pdf            # Protection données personnelles
-│   ├── Loi_2000-83_FR.pdf            # Commerce électronique
-│   ├── Loi_2016_71_FR.pdf            # Investissement
-│   └── Rapport_IC_Startup_Acts_FR.pdf
-│
-├── chunks/                           # 📄 Chunks pré-générés (12 fichiers .md)
-│
-├── scripts/                          # 🔧 Scripts d'infrastructure
-│   ├── start-local-stack.ps1         # Lance Neo4j + Qdrant en Docker
-│   ├── check-local-stack.ps1         # Vérifie l'état des conteneurs
-│   └── use-local-env.ps1             # Configure les variables pour le stack local
-│
-├── .env                              # Variables d'environnement (non versionné)
-├── .gitignore
-├── requirements.txt
-└── README.md                         # ← Ce fichier
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│ TEST SCENARIO A: Legal Compliance Scoring (Fintech Alert)                             │
+├────────────────────────────────────────────────────────────────────────────────────────┤
+│ • Input: Nom="PayDinar", Secteur="Fintech", Description="Mobile wallet & P2P payments"│
+│ • Expected Result: Score ~40-50% with explicit flag: "BCT Authorization Required"     │
+│ • Legal Citation: Loi n° 2016-48 & Circulaire BCT 2020-01                             │
+└────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+```
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│ TEST SCENARIO B: Document Generation (Company Statutes)                                │
+├────────────────────────────────────────────────────────────────────────────────────────┤
+│ • Input: Type="statuts", Forme="SUARL", Nom="NexInnovate", Capital=5000, Activité="SaaS"│
+│ • Expected Result: Generated markdown with Startup Act Art. 13 clauses and CSC format   │
+└────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+```
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│ TEST SCENARIO C: Corrective RAG (CRAG) Document Interrogation                          │
+├────────────────────────────────────────────────────────────────────────────────────────┤
+│ • Action: Upload a custom NDA or investment term sheet PDF in Notebook mode            │
+│ • Query: "Quelles sont les clauses de non-concurrence et pénalités applicables ?"      │
+│ • Expected Result: Verifiable extraction from the user's PDF with strip citations      │
+└────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 🤖 Les 5 Agents du Système
+## 🗺️ Roadmap & Milestones
 
-### 1. Agent GraphRAG (`ask_question.py`)
-
-**Rôle :** Répond aux questions juridiques en combinant recherche vectorielle et traversée du knowledge graph.
-
-**Pipeline :**
-1. Détection des salutations / non-questions
-2. Recherche hybride via `HybridRetriever` (Qdrant + Neo4j)
-3. Construction du contexte avec troncature intelligente (head+tail)
-4. Si contexte insuffisant → **Web Fallback** automatique (Serper + WebBaseLoader)
-5. Génération de la réponse via LLM (Groq ou Azure)
-6. Post-traitement : nettoyage des noms de fichiers, expansion des références juridiques
-
----
-
-### 2. Pipeline CRAG (`crag.py`)
-
-**Rôle :** Pipeline Corrective RAG avancé pour l'analyse de documents uploadés par l'utilisateur.
-
-| Étape | Description |
-|-------|-------------|
-| **1. Retrieve** | Récupère les documents via le HybridRetriever (mode `notebook` = uploads uniquement) |
-| **2. Grade** | Score chaque document sur [-1, 1] via LLM avec `with_structured_output` |
-| **3. Decide** | `use_docs` si score ≥ 0.6 / `web_search` si tous < -0.2 / `combine` sinon |
-| **4. Refine** | Décompose les docs en "knowledge strips" → score chaque strip → garde les pertinents |
-| **5. Rewrite** | Reformule la question en mots-clés web si recherche web nécessaire |
-| **6. Answer** | Génère la réponse finale avec le contexte raffiné + métadonnées CRAG |
+- [x] **Phase 1: Knowledge Graph & Hybrid RAG Engine**
+  - Ingestion pipeline for 12+ primary Tunisian legal codes.
+  - Neo4j graph entity linking and Qdrant vector retrieval.
+- [x] **Phase 2: Corrective RAG (CRAG) & RLM Sandbox**
+  - Algorithmic triangulation scoring formula.
+  - REPL code execution for big-document parsing.
+- [x] **Phase 3: Multi-Agent Orchestration & TeamBuilder Integration**
+  - A2A Drafter-Reviewer loop with strict legal approval rules.
+  - Integration of TeamBuilder recruitment microservice.
+  - Multi-dimensional Studio Pipeline (Legal, Market, Green, Tech).
+- [ ] **Phase 4: Ecosystem Expansion (In Progress)**
+  - [ ] Automated e-filing direct integration with the *Guichet Unique APII*.
+  - [ ] Fine-tuned Tunisian Dialect (Derja) legal assistant module.
+  - [ ] Multi-tenant organization accounts with role-based access control (RBAC).
 
 ---
 
-### 3. Agent Web (`chain.py`)
-
-**Rôle :** Agent LangChain avec outils bindés pour la recherche web autonome.
-
-| Outil | Description |
-|-------|-------------|
-| `serper_search` | Recherche Google via Serper API (10 résultats, filtre Tunisie) |
-| `scrape_website` | Extraction du contenu d'une URL via WebBaseLoader (max 15k chars) |
-
----
-
-### 4. Agent Rédacteur (`agent_redacteur.py`)
-
-**Rôle :** Génère des documents juridiques adaptés au projet startup.
-
-| Document | Base légale |
-|----------|-------------|
-| `statuts` | Statuts de société (SUARL, SARL, SA) — Code des Sociétés Commerciales |
-| `cgu` | Conditions Générales d'Utilisation — Loi n° 2004-63 |
-| `contrat_investissement` | Convention d'investissement — Startup Act Art. 13+ |
-| `demande_label` | Formulaire de demande du label Startup — Décret n° 2018-840 |
-
----
-
-### 5. Agent Veille Web (`agent_veille.py`)
-
-**Rôle :** Surveillance périodique des sites officiels tunisiens pour détecter les changements réglementaires.
-
-| Site | URL | Contenu |
-|------|-----|---------|
-| Portail Startup Act | startup.gov.tn | Label, avantages, procédures |
-| BCT | bct.gov.tn | Circulaires, devises, fintech |
-| APII | apii.tn | Création d'entreprise, investissement |
-
----
-
-## 🧠 Quiz de Conformité — Auto-évaluation
-
-Le quiz évalue si **votre société** respecte le cadre juridique tunisien. Il tire **10 questions aléatoires** parmi un pool de 22 questions couvrant **9 domaines** :
-
-| Domaine | Exemples de questions |
-|---------|----------------------|
-| **Startup Act** | Ancienneté < 8 ans ? Innovation technologique ? Indépendance ? |
-| **Forme juridique** | Capital minimum respecté ? Statuts formels ? |
-| **Protection données** | Déclaration INPDP ? Consentement explicite ? Politique de confidentialité ? |
-| **Fiscalité** | Déclarations IS/TVA à jour ? Expert comptable ? |
-| **Droit social** | Salariés déclarés CNSS ? Contrats écrits ? |
-| **E-commerce** | Mentions légales ? CGV/CGU ? |
-| **BCT / Fintech** | Agrément BCT ? KYC/AML ? Compte devises ? |
-| **Propriété intellectuelle** | Marque déposée INNORPI ? |
-| **Investissement** | Déclaration APII ? |
-
-**Scoring pondéré** : Chaque question a un poids (1-3) selon sa criticité. Le score final affiche :
-- Résultat par domaine avec barres de progression
-- Verdict : Très bonne conformité / Partielle / Insuffisant / Non conforme
-- Actions recommandées avec articles de loi correspondants
-
----
-
-## 🔌 API REST (Django Backend)
-
-| Endpoint | Méthode | Description |
-|----------|---------|-------------|
-| `/api/` | GET | Racine API — liste des endpoints |
-| `/api/chat/` | POST | Chat avec GraphRAG (mode `kb`) ou CRAG (mode `notebook`) |
-| `/api/upload/` | POST | Upload PDF → ingestion rapide dans Qdrant (collection `user_uploads`) |
-| `/api/conformite/` | POST | Analyse de conformité avec scoring pondéré par critère légal |
-| `/api/documents/` | POST | Génération de documents juridiques via AgentRédacteur |
-| `/api/graph/` | GET | Visualisation du graphe Neo4j (nœuds + arêtes) |
-| `/api/veille/` | GET | État de la veille réglementaire |
-| `/api/suggestions/` | POST | Questions suggérées contextuelles par secteur |
-
-### Moteur de Conformité (`/api/conformite/`)
-
-Le moteur de scoring analyse un projet startup sur **5 axes réglementaires** :
-
-| Axe | Loi de référence | Critères vérifiés |
-|-----|------------------|-------------------|
-| **Startup Act** | Loi n° 2018-20 | Innovation, âge, indépendance, siège, capital |
-| **Forme juridique** | Code des Sociétés | Capital minimum selon type (SUARL/SARL/SA) |
-| **Protection données** | Loi n° 2004-63 | Déclaration INPDP, consentement, sécurité |
-| **Réglementation BCT** | Loi 2016-48 + Circ. 2020-01 | Agrément paiement, capital, KYC/AML |
-| **Commerce électronique** | Loi n° 2000-83 | Mentions légales, CGU/CGV, droit de rétractation |
-
----
-
-## 🔧 Ingestion des Données (`ingest.py`)
-
-### Pipeline d'ingestion principale (corpus juridique)
+## 🛠️ Tech Stack Matrix
 
 ```
-chunks/*.md ──► Parse sections ──► Clean + Metadata ──►  Neo4j (GraphRAG)
-                                                    └──► Qdrant (Vectors)
-                                                    └──► LLMGraphTransformer
-```
-
-1. **Chargement** des chunks pré-générés depuis `chunks/` (12 fichiers markdown)
-2. **Nettoyage** des headers markdown, métadonnées, overlaps
-3. **Enrichissement** : détection des articles, références "Vu ...", domaines juridiques
-4. **Indexation Neo4j** : contraintes d'unicité, index, nœuds Document/Chunk/Article
-5. **Transformation Graph** : extraction automatique d'entités et relations via `LLMGraphTransformer`
-6. **Indexation Qdrant** : embeddings Ollama → upsert par batches avec vérification de dimension
-
-### Ingestion rapide (upload utilisateur)
-
-```
-PDF Upload ──► Unstructured/pypdf ──► Chunks sémantiques ──► Qdrant (user_uploads)
-```
-
-- Collection séparée `user_uploads` pour ne pas polluer le corpus principal
-- Fallback pypdf si Unstructured échoue
-- Découpage sémantique intelligent : articles juridiques → chapitres → paragraphes → fallback taille fixe
-
----
-
-## 🛠️ Stack Technologique
-
-| Catégorie | Technologie | Usage |
-|-----------|-------------|-------|
-| **Orchestration** | LangChain | Agents, tools, retrievers, prompts |
-| **LLM** | Groq (Llama 4 Scout) / Azure OpenAI | Génération de réponses |
-| **Knowledge Graph** | Neo4j (local Docker / Aura) | Relations juridiques entre entités |
-| **Vector Store** | Qdrant (local Docker / Cloud) | Recherche sémantique sur chunks |
-| **Embeddings** | Ollama + qwen3-embedding:0.6b | Vectorisation multilingue locale |
-| **Recherche Web** | Serper API + WebBaseLoader | Google Search + web scraping |
-| **Backend** | Django 5 + Django REST Framework | API REST avec serializers |
-| **Frontend** | Next.js 16 + React 19 + TailwindCSS 4 | Interface utilisateur |
-| **UI Components** | Radix UI + ShadCN + Lucide Icons | Composants accessibles |
-| **Config** | Pydantic Settings + dotenv | Validation des variables d'env |
-| **Parsing PDF** | Unstructured + pypdf + pdfplumber | Extraction de texte multi-stratégie |
-| **Scraping** | httpx + BeautifulSoup | Agent Veille Web |
-| **Infra locale** | Docker (Neo4j 5 + Qdrant) | Stack de développement |
-
----
-
-## � Port Configuration
-
-| Service | Port | URL | Module |
-|---------|------|-----|--------|
-| **Frontend** | 3000 | http://localhost:3000 | Both |
-| **ComplianceGuard Backend** | 8000 | http://localhost:8000 | ComplianceGuard |
-| **TeamBuilder Backend** | 8001 | http://localhost:8001 | TeamBuilder |
-| **Neo4j Browser** | 7474 | http://localhost:7474 | ComplianceGuard |
-| **Neo4j Bolt** | 7687 | bolt://localhost:7687 | ComplianceGuard |
-| **Qdrant** | 6333 | http://localhost:6333 | ComplianceGuard |
-| **PostgreSQL** | 5433 | localhost:5433 | TeamBuilder |
-| **Redis** | 6380 | localhost:6380 | TeamBuilder |
-
-## ✅ Verify Services
-
-Check all services are running:
-
-```bash
-# ComplianceGuard services
-curl http://localhost:7474  # Neo4j
-curl http://localhost:6333  # Qdrant
-curl http://localhost:8000/api/  # ComplianceGuard backend
-
-# TeamBuilder services
-docker ps | grep teambuilder  # PostgreSQL & Redis
-curl http://localhost:8001/health  # TeamBuilder backend
-
-# Frontend
-curl http://localhost:3000
-```
-
-## 🛠️ Troubleshooting
-
-### Port Already in Use
-```bash
-# Find what's using the port
-lsof -i :8001  # or any port
-
-# Kill the process
-kill -9 <PID>
-```
-
-### Database Connection Error (TeamBuilder)
-```bash
-cd Startify/backend/teambuilder
-
-# Check PostgreSQL is running
-docker compose ps
-
-# Check logs
-docker compose logs postgres
-
-# Restart if needed
-docker compose restart postgres
-```
-
-### Redis Connection Error (TeamBuilder)
-```bash
-# Test connection
-redis-cli -p 6380 ping
-# Should return: PONG
-```
-
-### Backend Not Starting
-```bash
-# Check if port is in use
-lsof -i :8001
-
-# Check Python dependencies
-pip list | grep Django
-
-# Check database connection
-cd Startify/backend/teambuilder
-../../.venv/bin/python manage.py check
+   FRONTEND                    BACKEND SERVICES             DATA & EMBEDDINGS           AI & ORCHESTRATION
+┌────────────────────┐      ┌────────────────────┐       ┌────────────────────┐      ┌────────────────────┐
+│ • Next.js 16 (App) │      │ • Django 5.0 REST  │       │ • Neo4j 5.15 Aura  │      │ • LangChain        │
+│ • React 19         │      │ • FastAPI Microsvc │       │ • Qdrant Vector DB │      │ • LangGraph        │
+│ • TailwindCSS 4    │      │ • Python 3.12      │       │ • PostgreSQL 16    │      │ • Ollama Local     │
+│ • Radix UI / ShadCN│      │ • Pydantic v2      │       │ • Redis 7          │      │ • Groq (Llama-3.3) │
+│ • Framer Motion    │      │ • Celery / Redis   │       │ • ChromaDB         │      │ • Azure OpenAI     │
+│ • xyflow (Graph)   │      │ • Unstructured     │       │ • SQLite Checkpoints│     │ • Google Serper    │
+└────────────────────┘      └────────────────────┘       └────────────────────┘      └────────────────────┘
 ```
 
 ---
 
-## 🧪 Guide de Test — Exemples par Fonctionnalité
+## 🤝 Contributing
 
-### 💬 Chat Juridique
+Contributions are welcome! Please follow these steps:
 
-**Mode Base juridique (GraphRAG) :**
-
-| Question à tester | Résultat attendu |
-|--------------------|------------------|
-| `Quels sont les avantages fiscaux du Startup Act ?` | Réponse citant Art. 13, exonération IS 4 ans |
-| `Comment obtenir le label startup ?` | Procédure via Startup Tunisia, conditions Art. 3 |
-| `Quelle est la procédure pour obtenir le label startup ?` | Multi-hop graph traversal |
-| `Capital minimum pour une SARL ?` | 1 000 TND, Code des Sociétés Art. 92 |
-| `Quelles sont les sanctions INPDP ?` | Protection données, Loi 2004-63 |
-| `Comment ouvrir un compte en devises startup ?` | Circulaire BCT 2019-01 |
-
-**Mode Mes documents (CRAG) — après upload PDF :**
-
-| Question à tester | Résultat attendu |
-|--------------------|------------------|
-| `Résume ce document en 5 points clés` | Résumé basé uniquement sur le PDF uploadé |
-| `Quels articles sont mentionnés ?` | Extraction d'entités juridiques |
-| `Quelles obligations sont définies ?` | Analyse juridique ciblée |
-| `Ce document mentionne-t-il des sanctions ?` | Recherche ciblée dans le contenu |
+1. **Fork the Repository**
+2. **Create a Feature Branch:**
+   ```bash
+   git checkout -b feature/AmazingFeature
+   ```
+3. **Commit Your Changes:**
+   ```bash
+   git commit -m "feat: add support for CNSS automated declaration checklist"
+   ```
+4. **Push to the Branch:**
+   ```bash
+   git push origin feature/AmazingFeature
+   ```
+5. **Open a Pull Request**
 
 ---
 
-### 📝 Documents
+## 📜 License
 
-| Test | Paramètres |
-|------|-----------|
-| **Statuts SUARL** | Nom: `TechInnovate` • Activité: `Plateforme SaaS B2B` • Capital: `5000` • Type: `SUARL` |
-| **CGU** | Nom: `DataSafe` • Activité: `Application mobile santé` |
-| **Pack complet** | Type: `Pack Complet` → génère les 4 documents |
+Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for more information.
 
 ---
 
-### ✅ Conformité
+<div align="center">
 
-| Test | Paramètres | Score attendu |
-|------|-----------|---------------|
-| **Fintech** | Secteur: Fintech • Desc: `Plateforme de paiement mobile avec wallet digital` • Capital: 50 000 | ~40% — alerte BCT |
-| **SaaS simple** | Secteur: SaaS • Desc: `Application de gestion de projets pour PME avec IA` • Capital: 5 000 | ~70%+ |
-| **HealthTech** | Secteur: HealthTech • Desc: `Application mobile de suivi médical avec données patients` | Score moyen — alerte INPDP |
+**Built with pride for the Tunisian Startup Ecosystem** 🇹🇳
 
----
+*Nexaura — Navigating Innovation, Automating Compliance, Empowering Founders.*
 
-### 🧠 Quiz Conformité
-
-| Test | Comment | Résultat |
-|------|---------|----------|
-| **Startup conforme** | Répondre la 1ère option (conforme) à chaque question | ~100%, "Très bonne conformité" |
-| **Non-conforme** | Répondre "Non" aux questions | Score bas + liste de recommandations |
-| **Cas réaliste** | Répondre honnêtement pour votre propre société | Score réel + actions par domaine |
-
----
-
-## 📚 Sources Juridiques Intégrées
-
-| Document | Description | Domaines |
-|----------|-------------|----------|
-| Loi n° 2018-20 | Startup Act tunisien | Label, IS, congé, bourse, devises |
-| Décret n° 2018-840 | Décret d'application | Procédure labélisation, conditions |
-| Circulaire BCT 2019-01 | Comptes startup en devises | Changes, levée de fonds |
-| Circulaire BCT 2019-02 | Carte Technologique | Transferts courants |
-| Code des Sociétés | Droit des sociétés commerciales | SARL, SA, SAS, capital, statuts |
-| Code Fiscal 2023 | Droits et Procédures Fiscaux | IS, TVA, déclarations |
-| Code du Travail | Droit du travail tunisien | Contrats, licenciement, congés |
-| Loi n° 2004-63 | Protection données personnelles | INPDP, vie privée |
-| Loi n° 2000-83 | Échanges électroniques | Signature, e-commerce |
-| Loi n° 2016-71 | Investissement | APII, incitations, FOPRODI |
-
----
-
-## 📄 Licence
-
-Projet privé — Usage interne uniquement.
-
----
-
-*Développé pour faciliter la conformité juridique des startups tunisiennes* 🇹🇳
+</div>

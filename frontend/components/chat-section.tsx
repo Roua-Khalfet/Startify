@@ -107,12 +107,15 @@ export default function ChatSection() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             message: currentInput,
-            thinkMode: true,
+            think_mode: true,
             project_context: "", // Could be passed from parent if needed
             mode: hasPdf ? 'notebook' : 'kb'
           })
         });
 
+        if (!response.ok) {
+          throw new Error(`API Error: ${response.status} ${response.statusText}`);
+        }
         if (!response.body) throw new Error('No body');
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
@@ -121,18 +124,21 @@ export default function ChatSection() {
         let reasoningAccumulator = '';
         let finalContent = '';
         let finalSources: string[] = [];
+        let buffer = '';
 
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
           
-          const chunk = decoder.decode(value, { stream: true });
-          const lines = chunk.split('\n');
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || '';
           
           for (const line of lines) {
-            if (line.startsWith('data: ')) {
+            const trimmedLine = line.trim();
+            if (trimmedLine.startsWith('data: ')) {
               try {
-                const data = JSON.parse(line.slice(6));
+                const data = JSON.parse(trimmedLine.slice(6));
                 
                 if (data.type === 'status') {
                   setThinkStatus(data.content);
@@ -151,12 +157,21 @@ export default function ChatSection() {
                 } else if (data.type === 'final') {
                   finalContent = data.content;
                   finalSources = data.sources || [];
-                  setMessages(prev => prev.map(m => m.id === assistantId ? { 
-                    ...m, content: finalContent, sources: finalSources, sourceType: 'Expertise Nexaura' 
-                  } : m));
+                  setMessages(prev => {
+                    const existing = prev.find(m => m.id === assistantId);
+                    if (existing) {
+                      return prev.map(m => m.id === assistantId ? { 
+                        ...m, content: finalContent, sources: finalSources, sourceType: 'Expertise Nexaura' 
+                      } : m);
+                    }
+                    return [...prev, {
+                      id: assistantId, role: 'assistant', content: finalContent, reasoning: reasoningAccumulator,
+                      timestamp: new Date(), sourceType: 'Expertise Nexaura', sources: finalSources
+                    }];
+                  });
                 }
               } catch (e) {
-                console.error("Parse error", e);
+                console.error("Parse error", e, "on line:", trimmedLine);
               }
             }
           }

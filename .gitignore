@@ -1,28 +1,91 @@
-# Python caches and bytecode
+# ==============================================================================
+#                      NEXAURA PLATFORM - .GITIGNORE
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 🐍 Python & Bytecode Caches
+# ------------------------------------------------------------------------------
 __pycache__/
 *.py[cod]
+*$py.class
 *.pyo
 *.pyd
-
-# Build and packaging artifacts
+.Python
 build/
+develop-eggs/
 dist/
+downloads/
+eggs/
 .eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
 *.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
 
-# Virtual environments
+# ------------------------------------------------------------------------------
+# 📦 Virtual Environments & Package Managers
+# ------------------------------------------------------------------------------
 venv/
 .venv/
 env/
+ENV/
+env.bak/
+venv.bak/
 node_modules/
+**/node_modules/
+.pnp
+.pnp.js
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*
 
-# Environment files
+# ------------------------------------------------------------------------------
+# ⚡ Next.js / React / Frontend Build Outputs
+# ------------------------------------------------------------------------------
+.next/
+**/.next/
+out/
+.vercel/
+*.tsbuildinfo
+next-env.d.ts.bak
+
+# ------------------------------------------------------------------------------
+# 🔐 Environment Variables & Sensitive Credentials
+# ------------------------------------------------------------------------------
 .env
 .env.*
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.pem
+*.key
+credentials.json
+client_secret*.json
+service-account*.json
+token.json
+
+# Whitelist example configs and docker env templates
 !.env.example
 !.env.docker.example
+!frontend/.env.example
+!backend/teambuilder/.env.example
+!backend/teambuilder/.env.docker.example
+!backend/tech-agent/.env.example
 
-# Databases
+# ------------------------------------------------------------------------------
+# 🗄️ Databases & Vector Stores
+# ------------------------------------------------------------------------------
+# SQLite
 *.sqlite3
 *.sqlite3-shm
 *.sqlite3-wal
@@ -30,36 +93,96 @@ db.sqlite3
 **/db.sqlite3
 **/checkpoints.sqlite3*
 
+# Neo4j Local Data & Logs
+.neo4j/
+neo4j-data/
+neo4j-logs/
 
-# Tool caches and test outputs
+# ChromaDB & Vector Stores
+backend/teambuilder/chroma_data/
+chroma_data/
+*.chroma
+
+# Qdrant Local Volume Data
+qdrant-data/
+qdrant_storage/
+
+# Postgres & Redis Local Mounts
+teambuilder-pgdata/
+langfuse-pgdata/
+postgres_data/
+redis_data/
+
+# ------------------------------------------------------------------------------
+# 🧪 Testing, Quality & Tooling Caches
+# ------------------------------------------------------------------------------
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
 .coverage
 .coverage.*
 htmlcov/
+.tox/
+.nox/
+.hypothesis/
+.cache/
+.eslintcache
 
-# Editors and OS files
-.vscode/
+# ------------------------------------------------------------------------------
+# 💻 IDEs, Editors & OS Files
+# ------------------------------------------------------------------------------
+# VS Code (preserve shared workspace settings if needed, ignore user configs)
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
 .idea/
+*.swp
+*.swo
+*~
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
+desktop.ini
 
-# Notebook artifacts
-.ipynb_checkpoints/
+# ------------------------------------------------------------------------------
+# 📝 Logs & Temporary Files
+# ------------------------------------------------------------------------------
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+celerybeat-schedule
+celerybeat.pid
 
-# Project-specific generated files
+# ------------------------------------------------------------------------------
+# 📊 User Uploads, Media & Generated Artifacts
+# ------------------------------------------------------------------------------
 report.md
+rapport_nexaura.pdf
+reports/
+*.pdf.tmp
+media/
+**/media/
+backend/saved_contexts/
+user_uploads/
+notebook_uploads/
+complianceguard/notebook_uploads/
 
-# Local data dumps (keep folder structure with .gitkeep if needed)
+# Keep Data directory structure but ignore massive raw data if specified
 Data/*
 !Data/.gitkeep
 
-# Nested repository metadata
+# ------------------------------------------------------------------------------
+# 🪆 Nested Repositories & Submodules
+# ------------------------------------------------------------------------------
 complianceguard/.git/
-
-# Neo4j database data and logs
-.neo4j/
-
-# Chroma DB data
-backend/teambuilder/chroma_data/
+backend/tech-agent/.git/
